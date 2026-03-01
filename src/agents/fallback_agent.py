@@ -8,6 +8,7 @@ import boto3
 import os
 import logging
 from dotenv import load_dotenv
+from botocore.exceptions import ClientError
 from config import BEDROCK_MODEL_ID, BEDROCK_REGION
 
 load_dotenv()
@@ -37,7 +38,11 @@ Always respond in a helpful, supportive manner.
 
 def fallback_agent(query: str, system_prompt: str = None) -> str:
     """
-    Fallback agent using direct Bedrock API (non-streaming converse)
+    Fallback agent using direct Bedrock API (non-streaming converse).
+    This is invoked when the Strands SDK streaming interface is unavailable or
+    returns an "Operation not allowed" error.  It also catches common
+    ValidationException responses (e.g. due to missing Bedrock permissions or
+    disabled model access) and raises a more user‑friendly error hint.
     
     Args:
         query: User's query
@@ -59,21 +64,40 @@ def fallback_agent(query: str, system_prompt: str = None) -> str:
         logger.info(f"Using fallback agent with model: {BEDROCK_MODEL_ID}")
         
         # Call non-streaming converse API
-        response = bedrock_runtime.converse(
-            modelId=BEDROCK_MODEL_ID,
-            system=[{
-                'text': system_prompt
-            }],
-            messages=[{
-                'role': 'user',
-                'content': [{'text': query}]
-            }],
-            inferenceConfig={
-                'maxTokens': 2000,
-                'temperature': 0.7
-            }
-        )
-        
+        try:
+            response = bedrock_runtime.converse(
+                modelId=BEDROCK_MODEL_ID,
+                system=[{
+                    'text': system_prompt
+                }],
+                messages=[{
+                    'role': 'user',
+                    'content': [{'text': query}]
+                }],
+                inferenceConfig={
+                    'maxTokens': 2000,
+                    'temperature': 0.7
+                }
+            )
+        except ClientError as e:
+            # some accounts or regions may not yet have permission for Converse
+            code = e.response.get('Error', {}).get('Code', '')
+            msg = e.response.get('Error', {}).get('Message', '')
+            logger.error(f"Bedrock ClientError ({code}): {msg}")
+
+            if code == 'ValidationException' and 'Operation not allowed' in msg:
+                # common when the account/role lacks bedrock:Converse or model access
+                hint = (
+                    "Your AWS account does not have permission to call the Converse "
+                    "operation or the specified model is not enabled in this region. "
+                    "Verify IAM policies, service quotas, and model access. "
+                    "You can run `py scripts/enable_bedrock_models.py` to check model access."
+                )
+                logger.error(hint)
+                raise RuntimeError(hint) from e
+            # re‑raise other client errors
+            raise
+
         # Extract response text
         response_text = response['output']['message']['content'][0]['text']
         

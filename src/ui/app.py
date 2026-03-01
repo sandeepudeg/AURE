@@ -364,9 +364,9 @@ def process_query_api(query: str, user_id: str, language: str = 'en', image_data
 
 
 def process_query_local(query: str, image_data: str = None, location: dict = None) -> dict:
-    """Process query using local agents (for development)"""
-    # Use simple supervisor for direct responses
-    from agents.supervisor_simple import supervisor_simple_agent
+    """Process query using local agents (for development) - uses non-streaming Bedrock API"""
+    # Use fallback agent instead of Strands to avoid ConverseStream issues
+    from agents.fallback_agent import fallback_agent
     
     try:
         # Add location context to query if available
@@ -381,14 +381,14 @@ def process_query_local(query: str, image_data: str = None, location: dict = Non
         else:
             query_with_context = query
         
-        # Get direct response from simple supervisor
-        response = supervisor_simple_agent(query_with_context)
+        # Get direct response from fallback (non-streaming) agent
+        response = fallback_agent(query_with_context)
         
         return {
             'success': True,
             'response': str(response),
             'agent_used': 'supervisor',
-            'metadata': {'location': location}
+            'metadata': {'location': location, 'agent_type': 'fallback_bedrock'}
         }
     except Exception as e:
         return {

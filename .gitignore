@@ -68,3 +68,4 @@ plant_dataset/
 
 # Documentation
 docs/_build/
+.venv/

@@ -15,23 +15,13 @@ import uuid
 import requests
 import time
 import logging
-
-import streamlit as st
 import boto3
 
-# Load credentials from secrets
 session = boto3.Session(
     aws_access_key_id=st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
     aws_secret_access_key=st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
     region_name=st.secrets["aws"]["AWS_DEFAULT_REGION"]
 )
-
-# Example: connect to S3
-# s3 = session.client("s3")
-# buckets = s3.list_buckets()
-# st.write("Buckets:", [b["Name"] for b in buckets["Buckets"]])
-
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,

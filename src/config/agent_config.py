@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Bedrock Model Configuration
-# Use Claude 3.5 Sonnet which has full ConverseStream (streaming) support
-BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0")
+# Use Amazon Nova which is widely available (Claude may not be enabled in all accounts)
+BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "amazon.nova-pro-v1:0")
 BEDROCK_REGION = os.getenv("BEDROCK_REGION", "us-east-1")
 
 # Agent Temperature Settings

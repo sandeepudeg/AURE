@@ -264,9 +264,10 @@ def invoke_supervisor_agent(
             except Exception:
                 model_id = os.getenv("BEDROCK_MODEL_ID", "amazon.nova-lite-v1:0")
 
-            response = bedrock_runtime.converse(
-                modelId=model_id,
-                messages=[{
+            # allow use of an inference profile if provided
+            inference_profile = os.getenv('BEDROCK_INFERENCE_PROFILE')
+            kwargs = {
+                "messages": [{
                     "role": "user",
                     "content": [
                         {
@@ -278,7 +279,13 @@ def invoke_supervisor_agent(
                         {"text": f"Analyze this crop image and answer: {query}"}
                     ]
                 }]
-            )
+            }
+            if inference_profile:
+                kwargs['inferenceProfileArn'] = inference_profile
+            else:
+                kwargs['modelId'] = model_id
+
+            response = bedrock_runtime.converse(**kwargs)
             
             image_analysis = response['output']['message']['content'][0]['text']
             
@@ -292,6 +299,8 @@ def invoke_supervisor_agent(
             # Strands SDK defaults to streaming which may not be allowed for all users
             try:
                 from agents.fallback_agent import fallback_agent
+                # pass through any configured inference profile so the
+                # fallback_agent can use it when needed
                 agent_response = fallback_agent(query)
                 agent_used = 'supervisor'
                 metadata = {'agent_type': 'fallback_bedrock'}

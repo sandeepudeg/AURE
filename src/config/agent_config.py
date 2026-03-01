@@ -13,6 +13,10 @@ load_dotenv()
 # Use Claude 3.5 Sonnet which is available in us-east-1
 BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0")
 BEDROCK_REGION = os.getenv("BEDROCK_REGION", "us-east-1")
+# If you are using a model that requires an inference profile (on-demand
+# throughput profiles for many generative models), set its ID or ARN here. The
+# code will prefer the profile over the raw model identifier when making calls.
+BEDROCK_INFERENCE_PROFILE = os.getenv("BEDROCK_INFERENCE_PROFILE", "")
 
 # Agent Temperature Settings
 SUPERVISOR_TEMPERATURE = 0.3  # Balanced for routing decisions

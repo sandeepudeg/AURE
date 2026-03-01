@@ -61,24 +61,39 @@ def fallback_agent(query: str, system_prompt: str = None) -> str:
             region_name=BEDROCK_REGION
         )
         
-        logger.info(f"Using fallback agent with model: {BEDROCK_MODEL_ID}")
-        
+        # Determine whether we'll send a raw modelId or an inference profile
+        # ARN/ID.  The environment variable allows callers to override the
+        # default.  This is necessary for "on‑demand" models which require a
+        # profile.
+        inference_profile = os.getenv('BEDROCK_INFERENCE_PROFILE')
+        if inference_profile:
+            logger.info(f"Using fallback agent with inference profile: {inference_profile}")
+        else:
+            logger.info(f"Using fallback agent with model: {BEDROCK_MODEL_ID}")
+
         # Call non-streaming converse API
         try:
-            response = bedrock_runtime.converse(
-                modelId=BEDROCK_MODEL_ID,
-                system=[{
+            kwargs = {
+                'system': [{
                     'text': system_prompt
                 }],
-                messages=[{
+                'messages': [{
                     'role': 'user',
                     'content': [{'text': query}]
                 }],
-                inferenceConfig={
+                'inferenceConfig': {
                     'maxTokens': 2000,
                     'temperature': 0.7
                 }
-            )
+            }
+            if inference_profile:
+                # The service expects either 'inferenceProfileArn' or
+                # 'inferenceProfileId'; ARN is acceptable and easier to supply.
+                kwargs['inferenceProfileArn'] = inference_profile
+            else:
+                kwargs['modelId'] = BEDROCK_MODEL_ID
+
+            response = bedrock_runtime.converse(**kwargs)
         except ClientError as e:
             # some accounts or regions may not yet have permission for Converse
             code = e.response.get('Error', {}).get('Code', '')

@@ -26,8 +26,10 @@ def make_client_error(code, message):
 class DummyClient:
     def __init__(self, exc=None):
         self.exc = exc
+        self.last_kwargs = None
 
     def converse(self, *args, **kwargs):
+        self.last_kwargs = kwargs
         if self.exc:
             raise self.exc
         return {
@@ -40,12 +42,31 @@ class DummyClient:
 
 
 @patch('agents.fallback_agent.boto3.client')
+def test_with_inference_profile(mock_client, monkeypatch):
+    """When an inference profile is set, it should be passed to converse."""
+    from src.agents.fallback_agent import fallback_agent
+
+    # override env
+    monkeypatch.setenv('BEDROCK_INFERENCE_PROFILE', 'arn:aws:profile:123')
+    client = DummyClient()
+    mock_client.return_value = client
+    resp = fallback_agent("hi")
+    assert resp == 'dummy response'
+    assert client.last_kwargs is not None
+    assert 'inferenceProfileArn' in client.last_kwargs
+    assert client.last_kwargs['inferenceProfileArn'] == 'arn:aws:profile:123'
+
+
+@patch('agents.fallback_agent.boto3.client')
 def test_fallback_success(mock_client):
     from src.agents.fallback_agent import fallback_agent
 
-    mock_client.return_value = DummyClient()
+    client = DummyClient()
+    mock_client.return_value = client
     resp = fallback_agent("hello world")
     assert resp == 'dummy response'
+    # should have sent a modelId key since no profile was defined
+    assert 'modelId' in client.last_kwargs
 
 
 @patch('agents.fallback_agent.boto3.client')

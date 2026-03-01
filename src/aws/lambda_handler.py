@@ -288,25 +288,22 @@ def invoke_supervisor_agent(
             agent_used = 'agri-expert'
             metadata = {'image_analysis': image_analysis}
         else:
-            # Text-only query - use simple supervisor with fallback
+            # Text-only query - use fallback agent (non-streaming) to avoid ConverseStream issues
+            # Strands SDK defaults to streaming which may not be allowed for all users
             try:
-                agent_response = supervisor_agent(query)
+                from agents.fallback_agent import fallback_agent
+                agent_response = fallback_agent(query)
                 agent_used = 'supervisor'
-                metadata = {}
+                metadata = {'agent_type': 'fallback_bedrock'}
             except Exception as e:
-                # If ConverseStream fails, fallback to direct Bedrock API
-                error_msg = str(e)
-                if 'ConverseStream' in error_msg or 'Operation not allowed' in error_msg:
-                    logger.warning(f"Strands ConverseStream failed, using fallback agent: {error_msg}")
-                    try:
-                        from agents.fallback_agent import fallback_agent
-                        agent_response = fallback_agent(query)
-                        agent_used = 'supervisor-fallback'
-                        metadata = {'fallback': True, 'reason': 'ConverseStream not available'}
-                    except Exception as fallback_error:
-                        logger.error(f"Fallback agent also failed: {fallback_error}")
-                        raise
-                else:
+                logger.error(f"Fallback agent failed, trying Strands supervisor: {str(e)}")
+                try:
+                    # Fallback to Strands agent if direct Bedrock fails
+                    agent_response = supervisor_agent(query)
+                    agent_used = 'supervisor'
+                    metadata = {}
+                except Exception as strands_error:
+                    logger.error(f"Strands supervisor also failed: {str(strands_error)}")
                     raise
         
         response_text = str(agent_response)

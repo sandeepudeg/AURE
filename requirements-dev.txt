@@ -1,0 +1,84 @@
+# URE MVP - Development & Testing Dependencies
+# Install with: pip install -r requirements-dev.txt
+
+# Include base requirements
+-r requirements.txt
+
+# ============================================================================
+# Testing & Quality Assurance
+# ============================================================================
+pytest==8.0.0                     # Testing framework
+pytest-cov==4.1.0                 # Code coverage
+pytest-mock==3.12.0               # Mocking
+pytest-asyncio==0.23.4            # Async testing
+pytest-xdist==3.5.0               # Parallel test execution
+pytest-timeout==2.2.0             # Test timeout management
+hypothesis==6.98.3                # Property-based testing
+faker==22.6.0                     # Generate fake data for testing
+factory-boy==3.3.0                # Test fixtures
+responses==0.24.1                 # Mock HTTP requests
+moto==5.0.0                       # Mock AWS services
+
+# ============================================================================
+# Code Quality & Linting
+# ============================================================================
+black==24.1.1                     # Code formatter
+isort==5.13.2                     # Import sorting
+flake8==7.0.0                     # Linting
+flake8-docstrings==1.7.0          # Docstring linting
+flake8-bugbear==24.1.17           # Additional bug detection
+pylint==3.0.3                     # Static analysis
+mypy==1.8.0                       # Type checking
+bandit==1.7.6                     # Security linting
+safety==3.0.1                     # Dependency vulnerability scanning
+
+# ============================================================================
+# Documentation
+# ============================================================================
+mkdocs==1.5.3                     # Documentation generator
+mkdocs-material==9.5.6            # Material theme
+mkdocstrings==0.24.0              # Auto-generate docs from docstrings
+mkdocs-mermaid2-plugin==1.1.1     # Mermaid diagrams support
+
+# ============================================================================
+# Development Tools
+# ============================================================================
+ipython==8.21.0                   # Enhanced Python shell
+ipdb==0.13.13                     # IPython debugger
+jupyter==1.0.0                    # Jupyter notebooks
+notebook==7.0.7                   # Jupyter notebook interface
+jupyterlab==4.0.11                # JupyterLab interface
+
+# ============================================================================
+# Performance & Profiling
+# ============================================================================
+memory-profiler==0.61.0           # Memory usage profiling
+py-spy==0.3.14                    # Sampling profiler
+locust==2.20.1                    # Load testing
+
+# ============================================================================
+# Pre-commit Hooks
+# ============================================================================
+pre-commit==3.6.0                 # Git pre-commit hooks framework
+
+# ============================================================================
+# Build & Packaging
+# ============================================================================
+build==1.0.3                      # Build tool
+twine==4.0.2                      # Package upload tool
+wheel==0.42.0                     # Wheel package format
+
+# ============================================================================
+# AWS Development Tools
+# ============================================================================
+aws-sam-cli==1.108.0              # AWS SAM CLI for local Lambda testing
+localstack==3.1.0                 # Local AWS cloud stack
+awscli==1.32.34                   # AWS CLI
+cfn-lint==0.85.2                  # CloudFormation linting
+
+# ============================================================================
+# Debugging & Monitoring
+# ============================================================================
+python-dotenv==1.0.1              # Environment variable management
+rich==13.7.0                      # Rich terminal output
+click==8.1.7                      # CLI creation

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GramSetu - Rural AI Assistant</title>
+    <link rel="stylesheet" href="complete.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="main-header">
+        <h1>🌾 GramSetu</h1>
+        <p>Your AI-Powered Rural Assistant</p>
+    </div>
+
+    <!-- Main container with sidebar -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <!-- Settings Section -->
+            <div class="sidebar-section">
+                <h3>⚙️ Settings</h3>
+                <div class="mode-indicator">
+                    <strong>🌐 Mode:</strong> AWS Deployed API<br>
+                    <small>Mumbai Lambda Endpoint</small>
+                </div>
+            </div>
+
+            <!-- Language Selection -->
+            <div class="sidebar-section">
+                <label for="languageSelect"><strong>Language / भाषा</strong></label>
+                <select id="languageSelect" class="form-control">
+                    <option value="en">🇬🇧 English</option>
+                    <option value="hi">🇮🇳 हिंदी</option>
+                    <option value="mr">🇮🇳 मराठी</option>
+                </select>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Location Display -->
+            <div class="sidebar-section">
+                <h3>📍 Your Location</h3>
+                <div class="location-box">
+                    <strong>📍 <span id="locationText">Nashik, Maharashtra</span></strong><br>
+                    <small>Auto-detected from IP</small>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- User Profile -->
+            <div class="sidebar-section">
+                <h3>👤 User Profile</h3>
+                <div id="profileForm" style="display: block;">
+                    <form id="userProfileForm">
+                        <div class="form-group">
+                            <label>Name / नाव</label>
+                            <input type="text" id="profileName" class="form-control" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label>Village / गाव</label>
+                            <input type="text" id="profileVillage" class="form-control" placeholder="Enter village">
+                        </div>
+                        <div class="form-group">
+                            <label>District / जिल्हा</label>
+                            <select id="profileDistrict" class="form-control">
+                                <option value="Nashik">Nashik</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Ahmednagar">Ahmednagar</option>
+                                <option value="Dhule">Dhule</option>
+                                <option value="Jalgaon">Jalgaon</option>
+                                <option value="Aurangabad">Aurangabad</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Nagpur">Nagpur</option>
+                                <option value="Solapur">Solapur</option>
+                                <option value="Kolhapur">Kolhapur</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone / फोन</label>
+                            <input type="tel" id="profilePhone" class="form-control" placeholder="+91XXXXXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label>Crops / पिके</label>
+                            <div id="cropsCheckboxes" class="checkbox-group">
+                                <label><input type="checkbox" value="Wheat"> Wheat</label>
+                                <label><input type="checkbox" value="Rice"> Rice</label>
+                                <label><input type="checkbox" value="Cotton"> Cotton</label>
+                                <label><input type="checkbox" value="Sugarcane"> Sugarcane</label>
+                                <label><input type="checkbox" value="Onion"> Onion</label>
+                                <label><input type="checkbox" value="Tomato"> Tomato</label>
+                                <label><input type="checkbox" value="Grapes"> Grapes</label>
+                                <label><input type="checkbox" value="Other"> Other</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Land Size (acres) / जमीन (एकर)</label>
+                            <input type="number" id="profileLandSize" class="form-control" min="0" max="1000" step="0.5" value="0">
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 Save Profile</button>
+                    </form>
+                </div>
+                <div id="profileDisplay" style="display: none;">
+                    <div class="profile-saved">
+                        <p><strong>✅ Profile Saved</strong></p>
+                        <p id="profileSummary"></p>
+                        <button id="editProfileBtn" class="btn btn-secondary">✏️ Edit Profile</button>
+                    </div>
+                </div>
+                <p class="user-id"><small>User ID: <span id="userId"></span></small></p>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Help Guide -->
+            <div class="sidebar-section">
+                <h3>❓ Help Guide</h3>
+                <div class="expander">
+                    <button class="expander-header">📖 How to Use GramSetu</button>
+                    <div class="expander-content">
+                        <p><strong>Welcome to GramSetu!</strong> Your AI-powered rural assistant.</p>
+                        <p><strong>What can I help you with?</strong></p>
+                        <ul>
+                            <li>🌱 Crop disease identification</li>
+                            <li>💰 Market prices and trends</li>
+                            <li>📋 Government schemes (PM-Kisan, PMFBY, etc.)</li>
+                            <li>💧 Irrigation recommendations</li>
+                            <li>🌤️ Weather forecasts</li>
+                            <li>🌾 Farming best practices</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="expander">
+                    <button class="expander-header">🌍 Language Support</button>
+                    <div class="expander-content">
+                        <p><strong>Available Languages:</strong></p>
+                        <ul>
+                            <li>🇬🇧 English</li>
+                            <li>🇮🇳 हिंदी (Hindi)</li>
+                            <li>🇮🇳 मराठी (Marathi)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="expander">
+                    <button class="expander-header">📷 Image Upload</button>
+                    <div class="expander-content">
+                        <p><strong>For Crop Disease Identification:</strong></p>
+                        <ul>
+                            <li>Click "Browse files" below the chat</li>
+                            <li>Select a clear photo of the affected crop</li>
+                            <li>Supported formats: JPG, JPEG, PNG</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="expander">
+                    <button class="expander-header">👤 User Profile</button>
+                    <div class="expander-content">
+                        <p><strong>Why create a profile?</strong></p>
+                        <ul>
+                            <li>Get personalized recommendations</li>
+                            <li>Save your conversation history</li>
+                            <li>Receive location-specific advice</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="expander">
+                    <button class="expander-header">💬 Feedback</button>
+                    <div class="expander-content">
+                        <p><strong>Help us improve!</strong></p>
+                        <p>After each response, you can:</p>
+                        <ul>
+                            <li>👍 Thumbs up if helpful</li>
+                            <li>👎 Thumbs down if not helpful</li>
+                            <li>Add comments to explain</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="expander">
+                    <button class="expander-header">🔒 Privacy & Safety</button>
+                    <div class="expander-content">
+                        <p><strong>Your Privacy Matters:</strong></p>
+                        <ul>
+                            <li>All conversations are encrypted</li>
+                            <li>Personal information is anonymized</li>
+                            <li>Data stored securely on AWS</li>
+                            <li>No data shared with third parties</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="expander">
+                    <button class="expander-header">📞 Contact & Support</button>
+                    <div class="expander-content">
+                        <p><strong>Need Help?</strong></p>
+                        <p><strong>Technical Support:</strong></p>
+                        <ul>
+                            <li>Email: support@gramsetu.in</li>
+                            <li>Phone: 1800-XXX-XXXX (Toll-free)</li>
+                        </ul>
+                        <p><strong>Agricultural Helpline:</strong></p>
+                        <ul>
+                            <li>Kisan Call Center: 1800-180-1551</li>
+                            <li>Available 24/7 in multiple languages</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Quick Actions -->
+            <div class="sidebar-section">
+                <h3>🚀 Quick Actions</h3>
+                <button class="btn btn-quick-action" data-query="I need help identifying a crop disease">🌱 Crop Disease Help</button>
+                <button class="btn btn-quick-action" data-query="What government schemes are available for farmers?">📋 Government Schemes</button>
+                <button class="btn btn-quick-action" data-query="What are the current market prices for crops?">💰 Market Prices</button>
+                <button class="btn btn-quick-action" data-query="When should I irrigate my crops?">💧 Irrigation Tips</button>
+                <button class="btn btn-quick-action" data-query="What is the weather forecast for the next few days?">🌤️ Weather Forecast</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Clear Chat -->
+            <div class="sidebar-section">
+                <button id="clearChatBtn" class="btn btn-danger">🗑️ Clear Chat</button>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <!-- Chat header -->
+            <div class="chat-header">
+                <h2>💬 Chat</h2>
+            </div>
+
+            <!-- Chat messages -->
+            <div class="chat-container" id="chatContainer">
+                <div class="welcome">
+                    <strong>👋 Welcome to GramSetu!</strong>
+                    <p style="margin-top: 0.5rem;">
+                        I'm your AI-powered rural assistant. I can help you with:
+                    </p>
+                    <ul>
+                        <li>🌱 Crop disease identification (upload a photo!)</li>
+                        <li>💰 Market prices and trends</li>
+                        <li>📋 Government schemes and eligibility</li>
+                        <li>💧 Irrigation and water management</li>
+                        <li>🌤️ Weather forecasts</li>
+                        <li>🌾 Farming best practices</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">
+                        <strong>Try asking:</strong>
+                    </p>
+                    <ul>
+                        <li>"What disease is affecting my tomato plant?"</li>
+                        <li>"What are current onion prices?"</li>
+                        <li>"Am I eligible for PM-Kisan?"</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">
+                        <small>💡 <strong>Tip:</strong> Check the Help Guide in the sidebar for more information!</small>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Image upload -->
+            <div class="image-upload-section" id="imageUploadSection">
+                <label for="imageUpload" class="image-upload-label">
+                    📷 Upload crop image (optional)
+                </label>
+                <input type="file" id="imageUpload" accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                <button id="imageUploadBtn" class="btn btn-secondary">Choose File</button>
+                <div id="imagePreview" style="display: none;">
+                    <img id="previewImg" src="" alt="Preview">
+                    <button id="removeImageBtn" class="btn btn-sm">✕ Remove</button>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="userInput" 
+                        placeholder="Ask me anything about farming, schemes, or resources..."
+                        autocomplete="off"
+                    />
+                    <button id="sendButton">Send</button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>🌾 GramSetu - Empowering Rural India with AI</p>
+                <p>Powered by AWS Bedrock</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="complete.js"></script>
+</body>
+</html>

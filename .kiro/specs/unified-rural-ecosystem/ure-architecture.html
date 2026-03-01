@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URE - Unified Rural Ecosystem Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+        
+        .architecture {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        
+        .component {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-width: 140px;
+            text-align: center;
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.3;
+        }
+        
+        .arrow {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        /* Color schemes for different components */
+        .farmer { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .frontend { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .gateway { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .lambda { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .supervisor { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .agent { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+        .data { background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%); }
+        .guardrail { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .translate { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .storage { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .response { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        
+        .details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .detail-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .detail-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .detail-card ul {
+            list-style: none;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        .detail-card li:before {
+            content: "▸ ";
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .flow-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .flow-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .flow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .step {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .step-number {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .architecture {
+                flex-direction: column;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 URE - Unified Rural Ecosystem</h1>
+        <p class="subtitle">Complete Architecture Flow: From Farmer Input to Response Delivery</p>
+        
+        <!-- Main Architecture Flow -->
+        <div class="architecture">
+            <!-- Farmer Input -->
+            <div class="component">
+                <div class="icon farmer">👨‍🌾</div>
+                <div class="label">Farmer Input<br/>(Web/WhatsApp/<br/>Telegram/Voice)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Streamlit Frontend -->
+            <div class="component">
+                <div class="icon frontend">🖥️</div>
+                <div class="label">Streamlit<br/>Web App<br/>(MVP)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- API Gateway -->
+            <div class="component">
+                <div class="icon gateway">🚪</div>
+                <div class="label">API Gateway<br/>Route &<br/>Validate</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Lambda Function -->
+            <div class="component">
+                <div class="icon lambda">⚡</div>
+                <div class="label">Lambda<br/>Orchestrator<br/>(Python)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Supervisor Agent -->
+            <div class="component">
+                <div class="icon supervisor">🎯</div>
+                <div class="label">Supervisor<br/>Agent<br/>(Claude 3.5)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Specialist Agents -->
+            <div class="component">
+                <div class="icon agent">🤖</div>
+                <div class="label">3 Specialist<br/>Agents<br/>(Parallel)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Data Sources -->
+            <div class="component">
+                <div class="icon data">📊</div>
+                <div class="label">Data Sources<br/>(S3, KB,<br/>APIs)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Guardrails -->
+            <div class="component">
+                <div class="icon guardrail">🛡️</div>
+                <div class="label">Bedrock<br/>Guardrails<br/>(Safety)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Translate -->
+            <div class="component">
+                <div class="icon translate">🌐</div>
+                <div class="label">Amazon<br/>Translate<br/>(Hindi/Marathi)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Storage -->
+            <div class="component">
+                <div class="icon storage">💾</div>
+                <div class="label">DynamoDB<br/>+ CloudWatch<br/>(Persist)</div>
+            </div>
+            
+            <div class="arrow">→</div>
+            
+            <!-- Response -->
+            <div class="component">
+                <div class="icon response">📱</div>
+                <div class="label">Response to<br/>Farmer<br/>(All Channels)</div>
+            </div>
+        </div>
+        
+        <!-- Component Details -->
+        <div class="details">
+            <div class="detail-card">
+                <h3>🌾 FARMER INPUT</h3>
+                <ul>
+                    <li>Web (Streamlit)</li>
+                    <li>WhatsApp (Twilio)</li>
+                    <li>Telegram (Bot API)</li>
+                    <li>Voice (Transcribe)</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>🖥️ FRONTEND</h3>
+                <ul>
+                    <li>Streamlit Web App</li>
+                    <li>Text & Image Input</li>
+                    <li>Conversation History</li>
+                    <li>Multi-language Support</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>🚪 API GATEWAY</h3>
+                <ul>
+                    <li>Route Requests</li>
+                    <li>Input Validation</li>
+                    <li>Rate Limiting</li>
+                    <li>Authentication</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>⚡ LAMBDA</h3>
+                <ul>
+                    <li>Parse Requests</li>
+                    <li>Retrieve User Context</li>
+                    <li>Invoke Supervisor</li>
+                    <li>Store Responses</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>🎯 SUPERVISOR</h3>
+                <ul>
+                    <li>Classify Query Type</li>
+                    <li>Route to Agents</li>
+                    <li>Orchestrate Flow</li>
+                    <li>Synthesize Response</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>🤖 SPECIALIST AGENTS</h3>
+                <ul>
+                    <li>Agri-Expert (Disease)</li>
+                    <li>Policy-Navigator (Schemes)</li>
+                    <li>Resource-Optimizer (Irrigation)</li>
+                    <li>Execute in Parallel</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>📊 DATA SOURCES</h3>
+                <ul>
+                    <li>S3 (PlantVillage, Sensor)</li>
+                    <li>Bedrock KB (Schemes)</li>
+                    <li>Agmarknet (Prices)</li>
+                    <li>IMD API (Weather)</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>🛡️ GUARDRAILS</h3>
+                <ul>
+                    <li>Safety Validation</li>
+                    <li>Content Filtering</li>
+                    <li>Harmful Advice Block</li>
+                    <li>Accuracy Check</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>🌐 TRANSLATE</h3>
+                <ul>
+                    <li>Language Detection</li>
+                    <li>Response Translation</li>
+                    <li>Hindi/Marathi Support</li>
+                    <li>Format Conversion</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>💾 STORAGE</h3>
+                <ul>
+                    <li>DynamoDB (Conversations)</li>
+                    <li>CloudWatch (Logs)</li>
+                    <li>S3 (Backups)</li>
+                    <li>KMS (Encryption)</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>📱 RESPONSE</h3>
+                <ul>
+                    <li>Web (JSON)</li>
+                    <li>WhatsApp (Message)</li>
+                    <li>Telegram (Message)</li>
+                    <li>Voice (Audio)</li>
+                </ul>
+            </div>
+            
+            <div class="detail-card">
+                <h3>⏱️ PERFORMANCE</h3>
+                <ul>
+                    <li>End-to-End: &lt;5 seconds</li>
+                    <li>50-100 Concurrent Users</li>
+                    <li>10-20 Requests/Second</li>
+                    <li>Cost: ~$68/month (MVP)</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Request Flow Details -->
+        <div class="flow-section">
+            <h2>📋 Complete Request-Response Flow</h2>
+            <div class="flow-steps">
+                <div class="step">
+                    <div class="step-number">1. INPUT</div>
+                    Farmer submits query (text/image/voice) via any channel
+                </div>
+                <div class="step">
+                    <div class="step-number">2. VALIDATE</div>
+                    API Gateway validates input format and size
+                </div>
+                <div class="step">
+                    <div class="step-number">3. RETRIEVE</div>
+                    Lambda retrieves user context from DynamoDB
+                </div>
+                <div class="step">
+                    <div class="step-number">4. CLASSIFY</div>
+                    Supervisor Agent classifies query type
+                </div>
+                <div class="step">
+                    <div class="step-number">5. ROUTE</div>
+                    Route to 1-3 specialist agents based on query
+                </div>
+                <div class="step">
+                    <div class="step-number">6. EXECUTE</div>
+                    Agents execute in parallel with data sources
+                </div>
+                <div class="step">
+                    <div class="step-number">7. SYNTHESIZE</div>
+                    Supervisor combines agent outputs
+                </div>
+                <div class="step">
+                    <div class="step-number">8. GUARDRAIL</div>
+                    Bedrock Guardrails validate response safety
+                </div>
+                <div class="step">
+                    <div class="step-number">9. TRANSLATE</div>
+                    Amazon Translate converts to user language
+                </div>
+                <div class="step">
+                    <div class="step-number">10. STORE</div>
+                    Store in DynamoDB and log to CloudWatch
+                </div>
+                <div class="step">
+                    <div class="step-number">11. FORMAT</div>
+                    Format response for delivery channel
+                </div>
+                <div class="step">
+                    <div class="step-number">12. DELIVER</div>
+                    Send response to farmer via Web/WhatsApp/Telegram/Voice
+                </div>
+            </div>
+        </div>
+        
+        <!-- MVP vs Full System -->
+        <div class="flow-section">
+            <h2>🎯 MVP vs Full System</h2>
+            <div class="flow-steps">
+                <div class="step">
+                    <div class="step-number">MVP (9 weeks)</div>
+                    Single village, 3 agents, Web only, PM-Kisan only, 50-100 users, ~$68/month
+                </div>
+                <div class="step">
+                    <div class="step-number">FULL (12 months)</div>
+                    Multi-village, 4 agents, Multi-channel, All schemes, 1000+ users, ~$500/month
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

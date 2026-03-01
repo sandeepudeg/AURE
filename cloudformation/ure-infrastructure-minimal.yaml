@@ -1,0 +1,324 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'URE MVP Infrastructure - Lambda, API Gateway, IAM, KMS (uses existing S3 and DynamoDB)'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: ure-mvp
+    Description: Project name for resource naming
+  
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Environment name
+  
+  BedrockModelId:
+    Type: String
+    Default: us.amazon.nova-pro-v1:0
+    Description: Bedrock model ID
+  
+  BedrockKnowledgeBaseId:
+    Type: String
+    Description: Bedrock Knowledge Base ID (existing)
+  
+  BedrockGuardrailId:
+    Type: String
+    Default: ''
+    Description: Bedrock Guardrail ID (optional)
+  
+  S3BucketName:
+    Type: String
+    Description: Existing S3 bucket name
+  
+  ConversationsTableName:
+    Type: String
+    Default: ure-conversations
+    Description: Existing DynamoDB conversations table
+  
+  UserProfilesTableName:
+    Type: String
+    Default: ure-user-profiles
+    Description: Existing DynamoDB user profiles table
+  
+  VillageAmenitiesTableName:
+    Type: String
+    Default: ure-village-amenities
+    Description: Existing DynamoDB village amenities table
+
+Resources:
+  # ============================================================================
+  # KMS Encryption Key
+  # ============================================================================
+  
+  EncryptionKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub '${ProjectName} encryption key for Lambda environment variables'
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          
+          - Sid: Allow Lambda to use the key
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Resource: '*'
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-encryption-key'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  EncryptionKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${ProjectName}-key'
+      TargetKeyId: !Ref EncryptionKey
+  
+  # ============================================================================
+  # IAM Roles (Least Privilege)
+  # ============================================================================
+  
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:UpdateItem'
+                Resource:
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ConversationsTableName}'
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${UserProfilesTableName}'
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${VillageAmenitiesTableName}'
+        
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3BucketName}/*'
+              - Effect: Allow
+                Action:
+                  - 's3:ListBucket'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3BucketName}'
+        
+        - PolicyName: BedrockAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'bedrock:InvokeModel'
+                  - 'bedrock:InvokeModelWithResponseStream'
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/*'
+              
+              - Effect: Allow
+                Action:
+                  - 'bedrock:Retrieve'
+                  - 'bedrock:RetrieveAndGenerate'
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/${BedrockKnowledgeBaseId}'
+              
+              - Effect: Allow
+                Action:
+                  - 'bedrock:ApplyGuardrail'
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*'
+        
+        - PolicyName: TranslateAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'translate:TranslateText'
+                Resource: '*'
+        
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'kms:Decrypt'
+                  - 'kms:DescribeKey'
+                Resource:
+                  - !GetAtt EncryptionKey.Arn
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-lambda-role'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  # ============================================================================
+  # Lambda Function
+  # ============================================================================
+  
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-handler'
+      Runtime: python3.11
+      Handler: lambda_handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 300
+      MemorySize: 1024
+      
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'body': 'Placeholder - deploy actual code with deploy_lambda.py'
+              }
+      
+      Environment:
+        Variables:
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          BEDROCK_KB_ID: !Ref BedrockKnowledgeBaseId
+          BEDROCK_GUARDRAIL_ID: !Ref BedrockGuardrailId
+          S3_BUCKET_NAME: !Ref S3BucketName
+          DYNAMODB_CONVERSATIONS_TABLE: !Ref ConversationsTableName
+          DYNAMODB_USER_PROFILES_TABLE: !Ref UserProfilesTableName
+          DYNAMODB_VILLAGE_AMENITIES_TABLE: !Ref VillageAmenitiesTableName
+          KMS_KEY_ID: !GetAtt EncryptionKey.Arn
+      
+      KmsKeyArn: !GetAtt EncryptionKey.Arn
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-lambda'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${LambdaFunction}'
+      RetentionInDays: 30
+  
+  # ============================================================================
+  # API Gateway
+  # ============================================================================
+  
+  RestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${ProjectName}-api'
+      Description: URE MVP REST API
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-api'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  ApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: query
+  
+  ApiMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref ApiResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations'
+  
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ApiMethod
+    Properties:
+      RestApiId: !Ref RestApi
+      StageName: !Ref Environment
+  
+  LambdaApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*'
+
+Outputs:
+  ApiGatewayUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/query'
+    Export:
+      Name: !Sub '${ProjectName}-api-url'
+  
+  LambdaFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt LambdaFunction.Arn
+    Export:
+      Name: !Sub '${ProjectName}-lambda-arn'
+  
+  LambdaFunctionName:
+    Description: Lambda function name
+    Value: !Ref LambdaFunction
+    Export:
+      Name: !Sub '${ProjectName}-lambda-name'
+  
+  KMSKeyId:
+    Description: KMS encryption key ID
+    Value: !GetAtt EncryptionKey.Arn
+    Export:
+      Name: !Sub '${ProjectName}-kms-key'
+  
+  LambdaRoleArn:
+    Description: Lambda execution role ARN
+    Value: !GetAtt LambdaExecutionRole.Arn
+    Export:
+      Name: !Sub '${ProjectName}-lambda-role-arn'

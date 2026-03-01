@@ -1,0 +1,778 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'URE MVP Infrastructure - Lambda, API Gateway, DynamoDB, S3, IAM, KMS, CloudWatch Alarms'
+
+Conditions:
+  HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
+  HasReservedConcurrency: !Not [!Equals [!Ref LambdaReservedConcurrency, 0]]
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: ure-mvp
+    Description: Project name for resource naming
+  
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Environment name
+  
+  BedrockModelId:
+    Type: String
+    Default: us.amazon.nova-pro-v1:0
+    Description: Bedrock model ID
+  
+  BedrockKnowledgeBaseId:
+    Type: String
+    Description: Bedrock Knowledge Base ID (must be created manually)
+  
+  BedrockGuardrailId:
+    Type: String
+    Default: ''
+    Description: Bedrock Guardrail ID (optional)
+  
+  AlarmEmail:
+    Type: String
+    Default: ''
+    Description: Email address for alarm notifications (optional)
+  
+  LambdaReservedConcurrency:
+    Type: Number
+    Default: 100
+    Description: Reserved concurrent executions for Lambda (0 = unreserved)
+  
+  ApiThrottleRateLimit:
+    Type: Number
+    Default: 1000
+    Description: API Gateway steady-state request rate limit (requests per second)
+  
+  ApiThrottleBurstLimit:
+    Type: Number
+    Default: 2000
+    Description: API Gateway burst request limit
+
+Resources:
+  # ============================================================================
+  # SNS Topic for Alarms (Optional)
+  # ============================================================================
+  
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Condition: HasAlarmEmail
+    Properties:
+      TopicName: !Sub '${ProjectName}-alarms'
+      DisplayName: URE MVP Alarms
+      Subscription:
+        - Endpoint: !Ref AlarmEmail
+          Protocol: email
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-alarm-topic'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  # ============================================================================
+  # KMS Encryption Key
+  # ============================================================================
+  
+  EncryptionKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub '${ProjectName} encryption key for S3, DynamoDB, Lambda'
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          
+          - Sid: Allow Lambda to use the key
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Resource: '*'
+          
+          - Sid: Allow DynamoDB to use the key
+            Effect: Allow
+            Principal:
+              Service: dynamodb.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:Encrypt'
+              - 'kms:DescribeKey'
+              - 'kms:CreateGrant'
+            Resource: '*'
+          
+          - Sid: Allow S3 to use the key
+            Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:Encrypt'
+              - 'kms:GenerateDataKey'
+            Resource: '*'
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-encryption-key'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  EncryptionKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${ProjectName}-key'
+      TargetKeyId: !Ref EncryptionKey
+  
+  # ============================================================================
+  # S3 Bucket
+  # ============================================================================
+  
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-data-${AWS::Region}-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !GetAtt EncryptionKey.Arn
+            BucketKeyEnabled: true
+      
+      VersioningConfiguration:
+        Status: Enabled
+      
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldUploads
+            Status: Enabled
+            Prefix: uploads/
+            ExpirationInDays: 30
+          
+          - Id: TransitionOldLogs
+            Status: Enabled
+            Prefix: logs/
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: GLACIER
+      
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-data-bucket'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  # ============================================================================
+  # DynamoDB Tables
+  # ============================================================================
+  
+  ConversationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-conversations'
+      BillingMode: PAY_PER_REQUEST
+      
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt EncryptionKey.Arn
+      
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-conversations'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  UserProfilesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-user-profiles'
+      BillingMode: PAY_PER_REQUEST
+      
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+      
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt EncryptionKey.Arn
+      
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-user-profiles'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  VillageAmenitiesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-village-amenities'
+      BillingMode: PAY_PER_REQUEST
+      
+      AttributeDefinitions:
+        - AttributeName: village_id
+          AttributeType: S
+      
+      KeySchema:
+        - AttributeName: village_id
+          KeyType: HASH
+      
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt EncryptionKey.Arn
+      
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-village-amenities'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  # ============================================================================
+  # IAM Roles (Least Privilege)
+  # ============================================================================
+  
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:UpdateItem'
+                Resource:
+                  - !GetAtt ConversationsTable.Arn
+                  - !GetAtt UserProfilesTable.Arn
+                  - !GetAtt VillageAmenitiesTable.Arn
+        
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                Resource:
+                  - !Sub '${DataBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - 's3:ListBucket'
+                Resource:
+                  - !GetAtt DataBucket.Arn
+        
+        - PolicyName: BedrockAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'bedrock:InvokeModel'
+                  - 'bedrock:InvokeModelWithResponseStream'
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}'
+              
+              - Effect: Allow
+                Action:
+                  - 'bedrock:Retrieve'
+                  - 'bedrock:RetrieveAndGenerate'
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/${BedrockKnowledgeBaseId}'
+              
+              - Effect: Allow
+                Action:
+                  - 'bedrock:ApplyGuardrail'
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*'
+        
+        - PolicyName: TranslateAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'translate:TranslateText'
+                  - 'translate:DetectDominantLanguage'
+                Resource: '*'
+        
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'kms:Decrypt'
+                  - 'kms:DescribeKey'
+                Resource:
+                  - !GetAtt EncryptionKey.Arn
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-lambda-role'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  # ============================================================================
+  # Lambda Function
+  # ============================================================================
+  
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-handler'
+      Runtime: python3.11
+      Handler: lambda_handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 300
+      MemorySize: 1024
+      ReservedConcurrentExecutions: !If [HasReservedConcurrency, !Ref LambdaReservedConcurrency, !Ref 'AWS::NoValue']
+      
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'body': 'Placeholder - deploy actual code'
+              }
+      
+      Environment:
+        Variables:
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          BEDROCK_KB_ID: !Ref BedrockKnowledgeBaseId
+          BEDROCK_GUARDRAIL_ID: !Ref BedrockGuardrailId
+          S3_BUCKET_NAME: !Ref DataBucket
+          DYNAMODB_CONVERSATIONS_TABLE: !Ref ConversationsTable
+          DYNAMODB_USER_PROFILES_TABLE: !Ref UserProfilesTable
+          DYNAMODB_VILLAGE_AMENITIES_TABLE: !Ref VillageAmenitiesTable
+          AWS_REGION: !Ref AWS::Region
+          KMS_KEY_ID: !GetAtt EncryptionKey.Arn
+      
+      KmsKeyArn: !GetAtt EncryptionKey.Arn
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-lambda'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${LambdaFunction}'
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt EncryptionKey.Arn
+  
+  # ============================================================================
+  # API Gateway
+  # ============================================================================
+  
+  RestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${ProjectName}-api'
+      Description: URE MVP REST API
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-api'
+        - Key: Environment
+          Value: !Ref Environment
+  
+  ApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestApi
+      ParentId: !GetAtt RestApi.RootResourceId
+      PathPart: query
+  
+  ApiMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApi
+      ResourceId: !Ref ApiResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations'
+  
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ApiMethod
+    Properties:
+      RestApiId: !Ref RestApi
+      StageName: !Ref Environment
+      StageDescription:
+        ThrottlingRateLimit: !Ref ApiThrottleRateLimit
+        ThrottlingBurstLimit: !Ref ApiThrottleBurstLimit
+        MetricsEnabled: true
+        LoggingLevel: INFO
+        DataTraceEnabled: false
+  
+  LambdaApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApi}/*'
+  
+  # ============================================================================
+  # CloudWatch Alarms
+  # ============================================================================
+  
+  LambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-lambda-errors'
+      AlarmDescription: Alert when Lambda error rate exceeds 5%
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
+      TreatMissingData: notBreaching
+      AlarmActions: !If [HasAlarmEmail, [!Ref AlarmTopic], []]
+  
+  LambdaDurationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-lambda-duration'
+      AlarmDescription: Alert when Lambda duration exceeds 30 seconds
+      MetricName: Duration
+      Namespace: AWS/Lambda
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 30000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
+      TreatMissingData: notBreaching
+  
+  LambdaThrottleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-lambda-throttles'
+      AlarmDescription: Alert when Lambda is being throttled
+      MetricName: Throttles
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaFunction
+      TreatMissingData: notBreaching
+  
+  ApiGateway5xxAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-api-5xx-errors'
+      AlarmDescription: Alert when API Gateway 5xx errors exceed 10
+      MetricName: 5XXError
+      Namespace: AWS/ApiGateway
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub '${ProjectName}-api'
+      TreatMissingData: notBreaching
+  
+  ApiGateway4xxAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-api-4xx-errors'
+      AlarmDescription: Alert when API Gateway 4xx errors exceed 50
+      MetricName: 4XXError
+      Namespace: AWS/ApiGateway
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 50
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub '${ProjectName}-api'
+      TreatMissingData: notBreaching
+  
+  ApiGatewayLatencyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-api-latency'
+      AlarmDescription: Alert when API Gateway latency exceeds 5 seconds
+      MetricName: Latency
+      Namespace: AWS/ApiGateway
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 5000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub '${ProjectName}-api'
+      TreatMissingData: notBreaching
+  
+  DynamoDBThrottleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-dynamodb-throttles'
+      AlarmDescription: Alert when DynamoDB requests are being throttled
+      MetricName: UserErrors
+      Namespace: AWS/DynamoDB
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: TableName
+          Value: !Ref ConversationsTable
+      TreatMissingData: notBreaching
+  
+  # ============================================================================
+  # CloudWatch Dashboard
+  # ============================================================================
+  
+  MonitoringDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub '${ProjectName}-dashboard'
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "properties": {
+                "title": "Lambda Invocations",
+                "metrics": [
+                  ["AWS/Lambda", "Invocations", {"stat": "Sum", "label": "Total Invocations"}]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "yAxis": {"left": {"min": 0}}
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "title": "Lambda Errors",
+                "metrics": [
+                  ["AWS/Lambda", "Errors", {"stat": "Sum", "label": "Errors", "color": "#d62728"}]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "yAxis": {"left": {"min": 0}}
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "title": "Lambda Duration",
+                "metrics": [
+                  ["AWS/Lambda", "Duration", {"stat": "Average", "label": "Avg Duration"}],
+                  ["...", {"stat": "Maximum", "label": "Max Duration"}]
+                ],
+                "period": 300,
+                "stat": "Average",
+                "region": "${AWS::Region}",
+                "yAxis": {"left": {"min": 0}}
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "title": "API Gateway Requests",
+                "metrics": [
+                  ["AWS/ApiGateway", "Count", {"stat": "Sum", "label": "Total Requests"}]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "yAxis": {"left": {"min": 0}}
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "title": "API Gateway Errors",
+                "metrics": [
+                  ["AWS/ApiGateway", "4XXError", {"stat": "Sum", "label": "4xx Errors", "color": "#ff7f0e"}],
+                  [".", "5XXError", {"stat": "Sum", "label": "5xx Errors", "color": "#d62728"}]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "yAxis": {"left": {"min": 0}}
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "title": "API Gateway Latency",
+                "metrics": [
+                  ["AWS/ApiGateway", "Latency", {"stat": "Average", "label": "Avg Latency"}],
+                  ["...", {"stat": "p95", "label": "p95 Latency"}]
+                ],
+                "period": 300,
+                "stat": "Average",
+                "region": "${AWS::Region}",
+                "yAxis": {"left": {"min": 0}}
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "title": "DynamoDB Consumed Capacity",
+                "metrics": [
+                  ["AWS/DynamoDB", "ConsumedReadCapacityUnits", {"stat": "Sum", "label": "Read Capacity"}],
+                  [".", "ConsumedWriteCapacityUnits", {"stat": "Sum", "label": "Write Capacity"}]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}",
+                "yAxis": {"left": {"min": 0}}
+              }
+            },
+            {
+              "type": "log",
+              "properties": {
+                "title": "Recent Lambda Errors",
+                "query": "SOURCE '/aws/lambda/${LambdaFunction}'\n| fields @timestamp, @message\n| filter @message like /ERROR/\n| sort @timestamp desc\n| limit 20",
+                "region": "${AWS::Region}"
+              }
+            }
+          ]
+        }
+
+Outputs:
+  ApiGatewayUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/query'
+    Export:
+      Name: !Sub '${ProjectName}-api-url'
+  
+  LambdaFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt LambdaFunction.Arn
+    Export:
+      Name: !Sub '${ProjectName}-lambda-arn'
+  
+  S3BucketName:
+    Description: S3 bucket name
+    Value: !Ref DataBucket
+    Export:
+      Name: !Sub '${ProjectName}-s3-bucket'
+  
+  ConversationsTableName:
+    Description: DynamoDB conversations table name
+    Value: !Ref ConversationsTable
+    Export:
+      Name: !Sub '${ProjectName}-conversations-table'
+  
+  UserProfilesTableName:
+    Description: DynamoDB user profiles table name
+    Value: !Ref UserProfilesTable
+    Export:
+      Name: !Sub '${ProjectName}-user-profiles-table'
+  
+  VillageAmenitiesTableName:
+    Description: DynamoDB village amenities table name
+    Value: !Ref VillageAmenitiesTable
+    Export:
+      Name: !Sub '${ProjectName}-village-amenities-table'
+  
+  KMSKeyId:
+    Description: KMS encryption key ID
+    Value: !GetAtt EncryptionKey.Arn
+    Export:
+      Name: !Sub '${ProjectName}-kms-key'
+  
+  LambdaRoleArn:
+    Description: Lambda execution role ARN
+    Value: !GetAtt LambdaExecutionRole.Arn
+    Export:
+      Name: !Sub '${ProjectName}-lambda-role-arn'

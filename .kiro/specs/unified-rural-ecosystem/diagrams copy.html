@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URE Process Flow Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .diagram-container {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>URE - Unified Rural Ecosystem Process Flow Diagrams</h1>
+
+    <!-- Diagram 1: High-Level System Flow -->
+    <div class="diagram-container">
+        <h2>1. High-Level System Flow</h2>
+        <div class="mermaid">
+graph TD
+    A["👨‍🌾 Farmer Input<br/>(Web, WhatsApp, Telegram, Voice)"] --> B["Input Processing<br/>Parse & Validate"]
+    B --> C["Supervisor Agent<br/>Classify & Route"]
+    C --> D1["Agri-Expert<br/>Agent"]
+    C --> D2["Policy-Navigator<br/>Agent"]
+    C --> D3["Resource-Optimizer<br/>Agent"]
+    D1 --> E["Response Synthesis<br/>Combine & Guardrails"]
+    D2 --> E
+    D3 --> E
+    E --> F["Translate Response<br/>Hindi/Marathi"]
+    F --> G["Persistence<br/>DynamoDB + CloudWatch"]
+    G --> H["📱 Response Delivery<br/>to Farmer"]
+    
+    style A fill:#90EE90
+    style C fill:#FFB6C1
+    style D1 fill:#87CEEB
+    style D2 fill:#87CEEB
+    style D3 fill:#87CEEB
+    style E fill:#FFD700
+    style H fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 2: Disease Identification Flow -->
+    <div class="diagram-container">
+        <h2>2. Disease Identification Flow</h2>
+        <div class="mermaid">
+graph TD
+    A["🌾 Farmer Uploads<br/>Crop Image"] --> B["Upload to S3<br/>Encrypt with KMS"]
+    B --> C["Generate Embedding<br/>Titan Multimodal"]
+    C --> D["Search PlantVillage<br/>OpenSearch"]
+    D --> E["Analyze with Claude<br/>3.5 Sonnet"]
+    E --> F["Fetch Treatment<br/>Bedrock KB"]
+    F --> G["Fetch Market Prices<br/>Agmarknet API"]
+    G --> H["Apply Guardrails<br/>Safety Check"]
+    H --> I["Translate Response<br/>User Language"]
+    I --> J["Return to Farmer<br/>Disease + Treatment + Price"]
+    
+    style A fill:#90EE90
+    style E fill:#FFB6C1
+    style J fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 3: PM-Kisan Eligibility Flow -->
+    <div class="diagram-container">
+        <h2>3. PM-Kisan Eligibility Flow</h2>
+        <div class="mermaid">
+graph TD
+    A["❓ Farmer Asks<br/>PM-Kisan Eligibility"] --> B["Search Bedrock KB<br/>Retrieve Criteria"]
+    B --> C["Check Farmer Profile<br/>DynamoDB"]
+    C --> D["Assess Eligibility<br/>Compare Criteria"]
+    D --> E["Get Application Info<br/>Bedrock KB"]
+    E --> F["Apply Guardrails<br/>Validate"]
+    F --> G["Translate Response<br/>User Language"]
+    G --> H["Return to Farmer<br/>Eligibility + Subsidy + Process"]
+    
+    style A fill:#90EE90
+    style D fill:#FFB6C1
+    style H fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 4: Irrigation Recommendation Flow -->
+    <div class="diagram-container">
+        <h2>4. Irrigation Recommendation Flow</h2>
+        <div class="mermaid">
+graph TD
+    A["💧 Farmer Asks<br/>Should I Irrigate?"] --> B["Retrieve Sensor Data<br/>S3"]
+    B --> C["Fetch Weather Data<br/>IMD API"]
+    C --> D["Calculate ET<br/>Hargreaves-Samani"]
+    D --> E["Analyze Soil Moisture<br/>Current vs Threshold"]
+    E --> F["Decision Logic<br/>Wait/Irrigate/Skip"]
+    F --> G["Optimize Schedule<br/>Cost & Water"]
+    G --> H["Apply Guardrails<br/>Validate"]
+    H --> I["Translate Response<br/>User Language"]
+    I --> J["Return to Farmer<br/>Recommendation + Schedule"]
+    
+    style A fill:#90EE90
+    style F fill:#FFB6C1
+    style J fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 5: Multi-Agent Orchestration -->
+    <div class="diagram-container">
+        <h2>5. Multi-Agent Orchestration Flow</h2>
+        <div class="mermaid">
+graph TD
+    A["🌾 Complex Query<br/>Disease + Price + Irrigation + Subsidy"] --> B["Supervisor Agent<br/>Classify & Route"]
+    B --> C1["Agri-Expert<br/>Disease Analysis"]
+    B --> C2["Policy-Navigator<br/>Scheme Eligibility"]
+    B --> C3["Resource-Optimizer<br/>Irrigation Plan"]
+    C1 --> D["Response Synthesis<br/>Combine All Outputs"]
+    C2 --> D
+    C3 --> D
+    D --> E["Apply Guardrails<br/>Safety Check"]
+    E --> F["Translate Response<br/>User Language"]
+    F --> G["Return Unified Response<br/>All Domains"]
+    
+    style A fill:#90EE90
+    style B fill:#FFB6C1
+    style C1 fill:#87CEEB
+    style C2 fill:#87CEEB
+    style C3 fill:#87CEEB
+    style D fill:#FFD700
+    style G fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 6: Data Flow Architecture -->
+    <div class="diagram-container">
+        <h2>6. Data Flow Architecture</h2>
+        <div class="mermaid">
+graph TD
+    A["📱 Farmer Input<br/>Web/WhatsApp/Telegram/Voice"] --> B["API Gateway<br/>Route & Validate"]
+    B --> C["Lambda Function<br/>Orchestrator"]
+    C --> D1["Agri-Expert<br/>Agent"]
+    C --> D2["Policy-Navigator<br/>Agent"]
+    C --> D3["Resource-Optimizer<br/>Agent"]
+    D1 --> E1["S3<br/>Images"]
+    D1 --> E2["OpenSearch<br/>Embeddings"]
+    D1 --> E3["Agmarknet<br/>Prices"]
+    D2 --> E4["Bedrock KB<br/>Schemes"]
+    D2 --> E5["DynamoDB<br/>Eligibility"]
+    D3 --> E6["S3<br/>Sensor Data"]
+    D3 --> E7["IMD API<br/>Weather"]
+    E1 --> F["Bedrock Guardrails<br/>Safety"]
+    E2 --> F
+    E3 --> F
+    E4 --> F
+    E5 --> F
+    E6 --> F
+    E7 --> F
+    F --> G["Amazon Translate<br/>Language"]
+    G --> H["DynamoDB<br/>Store"]
+    H --> I["CloudWatch<br/>Logs"]
+    G --> J["📱 Response to Farmer"]
+    
+    style A fill:#90EE90
+    style C fill:#FFB6C1
+    style D1 fill:#87CEEB
+    style D2 fill:#87CEEB
+    style D3 fill:#87CEEB
+    style J fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 7: Error Handling Flow -->
+    <div class="diagram-container">
+        <h2>7. Error Handling Flow</h2>
+        <div class="mermaid">
+graph TD
+    A["Request Received"] --> B{"Validate<br/>Input"}
+    B -->|Invalid| C["Return Error<br/>Invalid Format"]
+    B -->|Valid| D["Process Request"]
+    D --> E{"Execute<br/>Agents"}
+    E -->|Timeout| F["Fallback Response<br/>Unable to Analyze"]
+    E -->|API Failure| G["Fallback Response<br/>Service Unavailable"]
+    E -->|Guardrail Block| H["Safe Response<br/>Cannot Provide"]
+    E -->|Success| I["Return Response"]
+    C --> J["Log Error<br/>CloudWatch"]
+    F --> J
+    G --> J
+    H --> J
+    I --> J
+    J --> K["Response to Farmer"]
+    
+    style A fill:#90EE90
+    style B fill:#FFD700
+    style E fill:#FFD700
+    style C fill:#FF6B6B
+    style F fill:#FF6B6B
+    style G fill:#FF6B6B
+    style H fill:#FF6B6B
+    style K fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 8: Conversation History Flow -->
+    <div class="diagram-container">
+        <h2>8. Conversation History Flow</h2>
+        <div class="mermaid">
+graph TD
+    A["First Message<br/>User Query"] --> B["Process Query<br/>Invoke Agents"]
+    B --> C["Store in DynamoDB<br/>User + Assistant"]
+    C --> D["Return Response<br/>Display History"]
+    D --> E["Second Message<br/>Follow-up Query"]
+    E --> F["Retrieve History<br/>Last 10 Messages"]
+    F --> G["Process with Context<br/>Include History"]
+    G --> H["Append to History<br/>New Messages"]
+    H --> I["Return Response<br/>Show Full History"]
+    
+    style A fill:#90EE90
+    style B fill:#FFB6C1
+    style C fill:#87CEEB
+    style D fill:#90EE90
+    style E fill:#90EE90
+    style G fill:#FFB6C1
+    style I fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 9: Multi-Channel Request Flow -->
+    <div class="diagram-container">
+        <h2>9. Multi-Channel Request Flow</h2>
+        <div class="mermaid">
+graph TD
+    A1["🌐 Web App<br/>Streamlit"] --> B["Channel Adapter<br/>Normalize Input"]
+    A2["💬 WhatsApp<br/>Twilio"] --> B
+    A3["📱 Telegram<br/>Bot API"] --> B
+    A4["🎤 Voice<br/>Transcribe"] --> B
+    B --> C["Unified Backend<br/>Lambda + Agents"]
+    C --> D["Response Formatter<br/>Format for Channel"]
+    D --> E1["Web App<br/>JSON"]
+    D --> E2["WhatsApp<br/>Message"]
+    D --> E3["Telegram<br/>Message"]
+    D --> E4["Voice<br/>Audio"]
+    
+    style A1 fill:#87CEEB
+    style A2 fill:#87CEEB
+    style A3 fill:#87CEEB
+    style A4 fill:#87CEEB
+    style B fill:#FFD700
+    style C fill:#FFB6C1
+    style D fill:#FFD700
+    style E1 fill:#90EE90
+    style E2 fill:#90EE90
+    style E3 fill:#90EE90
+    style E4 fill:#90EE90
+        </div>
+    </div>
+
+    <!-- Diagram 10: MVP Architecture -->
+    <div class="diagram-container">
+        <h2>10. MVP Architecture Overview</h2>
+        <div class="mermaid">
+graph TD
+    A["🌾 Streamlit Web App<br/>MVP Frontend"] --> B["API Gateway<br/>Single /query Endpoint"]
+    B --> C["Lambda Function<br/>Python 3.9"]
+    C --> D["Strands Supervisor<br/>Claude 3.5 Sonnet"]
+    D --> E1["Agri-Expert<br/>Agent"]
+    D --> E2["Policy-Navigator<br/>Agent"]
+    D --> E3["Resource-Optimizer<br/>Agent"]
+    E1 --> F1["S3<br/>PlantVillage"]
+    E1 --> F2["OpenSearch<br/>Embeddings"]
+    E1 --> F3["Agmarknet<br/>Prices"]
+    E2 --> F4["Bedrock KB<br/>PM-Kisan"]
+    E2 --> F5["DynamoDB<br/>Village Data"]
+    E3 --> F6["S3<br/>Sensor Logs"]
+    E3 --> F7["OpenWeather<br/>API"]
+    F1 --> G["Bedrock Guardrails"]
+    F2 --> G
+    F3 --> G
+    F4 --> G
+    F5 --> G
+    F6 --> G
+    F7 --> G
+    G --> H["Amazon Translate"]
+    H --> I["DynamoDB<br/>Conversations"]
+    I --> J["CloudWatch<br/>Logs"]
+    H --> K["Response to Streamlit"]
+    
+    style A fill:#90EE90
+    style C fill:#FFB6C1
+    style D fill:#FFB6C1
+    style E1 fill:#87CEEB
+    style E2 fill:#87CEEB
+    style E3 fill:#87CEEB
+    style K fill:#90EE90
+        </div>
+    </div>
+
+</body>
+</html>

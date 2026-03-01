@@ -1,0 +1,90 @@
+{
+  "get_mandi_prices": {
+    "tool_id": "get_mandi_prices",
+    "server_name": "agmarknet",
+    "description": "Get current market prices for crops from Agmarknet",
+    "permissions": ["Agri-Expert", "Supervisor"],
+    "timeout_ms": 5000,
+    "retry_count": 3,
+    "parameters": {
+      "crop": {
+        "type": "string",
+        "required": true,
+        "description": "Crop name (e.g., 'Tomato', 'Wheat')"
+      },
+      "district": {
+        "type": "string",
+        "required": true,
+        "description": "District name"
+      },
+      "state": {
+        "type": "string",
+        "required": true,
+        "description": "State name"
+      }
+    }
+  },
+  "get_nearby_mandis": {
+    "tool_id": "get_nearby_mandis",
+    "server_name": "agmarknet",
+    "description": "Get list of nearby mandis (markets) within specified radius",
+    "permissions": ["Agri-Expert", "Supervisor"],
+    "timeout_ms": 5000,
+    "retry_count": 3,
+    "parameters": {
+      "district": {
+        "type": "string",
+        "required": true,
+        "description": "District name"
+      },
+      "radius_km": {
+        "type": "number",
+        "required": false,
+        "default": 50,
+        "description": "Search radius in kilometers"
+      }
+    }
+  },
+  "get_current_weather": {
+    "tool_id": "get_current_weather",
+    "server_name": "weather",
+    "description": "Get current weather conditions for a location",
+    "permissions": ["Resource-Optimizer", "Supervisor"],
+    "timeout_ms": 3000,
+    "retry_count": 3,
+    "parameters": {
+      "location": {
+        "type": "string",
+        "required": true,
+        "description": "Location name (city, district, or coordinates)"
+      },
+      "units": {
+        "type": "string",
+        "required": false,
+        "default": "metric",
+        "description": "Units system: 'metric' or 'imperial'"
+      }
+    }
+  },
+  "get_weather_forecast": {
+    "tool_id": "get_weather_forecast",
+    "server_name": "weather",
+    "description": "Get weather forecast for next N days",
+    "permissions": ["Resource-Optimizer", "Supervisor"],
+    "timeout_ms": 3000,
+    "retry_count": 3,
+    "parameters": {
+      "location": {
+        "type": "string",
+        "required": true,
+        "description": "Location name (city, district, or coordinates)"
+      },
+      "days": {
+        "type": "number",
+        "required": false,
+        "default": 3,
+        "description": "Number of days to forecast (1-7)"
+      }
+    }
+  }
+}

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URE MVP API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c5f2d;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #2c5f2d;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #1e4620;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .response {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #2c5f2d;
+            display: none;
+        }
+        .response.show {
+            display: block;
+        }
+        .response h3 {
+            margin-top: 0;
+            color: #2c5f2d;
+        }
+        .response pre {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .error {
+            border-left-color: #d32f2f;
+        }
+        .error h3 {
+            color: #d32f2f;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 URE MVP API Test</h1>
+        
+        <form id="queryForm">
+            <div class="form-group">
+                <label for="userId">User ID:</label>
+                <input type="text" id="userId" value="test_user_001" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="query">Query:</label>
+                <textarea id="query" placeholder="Ask about crops, diseases, government schemes, or irrigation..." required>What crops are suitable for Maharashtra?</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="language">Language:</label>
+                <select id="language">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi (हिंदी)</option>
+                    <option value="mr">Marathi (मराठी)</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="submitBtn">Send Query</button>
+        </form>
+        
+        <div class="loading" id="loading" style="display: none;">
+            ⏳ Processing your query...
+        </div>
+        
+        <div class="response" id="response">
+            <h3>Response:</h3>
+            <div id="responseContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://8938dqxf33.execute-api.us-east-1.amazonaws.com/dev/query';
+        
+        document.getElementById('queryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const query = document.getElementById('query').value;
+            const language = document.getElementById('language').value;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const responseDiv = document.getElementById('response');
+            const responseContent = document.getElementById('responseContent');
+            
+            // Show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            responseDiv.classList.remove('show', 'error');
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        query: query,
+                        language: language
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Display response
+                responseDiv.classList.add('show');
+                
+                if (response.ok) {
+                    responseContent.innerHTML = `
+                        <p><strong>Agent Used:</strong> ${data.agent_used}</p>
+                        <p><strong>Response:</strong></p>
+                        <pre>${data.response}</pre>
+                        ${data.metadata && Object.keys(data.metadata).length > 0 ? 
+                            `<p><strong>Metadata:</strong></p><pre>${JSON.stringify(data.metadata, null, 2)}</pre>` : 
+                            ''}
+                    `;
+                } else {
+                    responseDiv.classList.add('error');
+                    responseContent.innerHTML = `
+                        <p><strong>Error:</strong></p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                responseDiv.classList.add('show', 'error');
+                responseContent.innerHTML = `
+                    <p><strong>Error:</strong></p>
+                    <pre>${error.message}</pre>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

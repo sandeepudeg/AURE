@@ -1,0 +1,345 @@
+openapi: 3.0.0
+info:
+  title: URE MVP API
+  version: 1.0.0
+  description: |
+    Unified Rural Ecosystem (URE) API for farmer assistance.
+    
+    This API provides AI-powered agricultural assistance including:
+    - Crop disease diagnosis via image analysis
+    - Market price information from Agmarknet
+    - Government scheme guidance (PM-Kisan)
+    - Irrigation recommendations based on weather and soil data
+    
+    **Multi-language Support**: English, Hindi, Marathi
+    
+    **Authentication**: None (MVP - will add in production)
+    
+  contact:
+    name: URE Support
+    email: support@ure-mvp.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://jooncpo7cb.execute-api.us-east-1.amazonaws.com/dev
+    description: Development server
+  - url: https://api.ure-mvp.com/v1
+    description: Production server (future)
+
+tags:
+  - name: Query
+    description: Submit farmer queries and get AI-powered responses
+  - name: Health
+    description: API health check endpoints
+
+paths:
+  /query:
+    post:
+      tags:
+        - Query
+      summary: Submit farmer query
+      description: |
+        Submit a farmer query and receive an AI-powered response.
+        
+        The query can be:
+        - Text-based question
+        - Image URL for disease identification
+        - Combination of text and image
+        
+        The API will:
+        1. Route the query to the appropriate specialist agent
+        2. Process the query using AI (Claude 3.5 Sonnet)
+        3. Retrieve relevant information from knowledge bases
+        4. Apply safety guardrails
+        5. Translate response to requested language
+        6. Return structured response
+        
+      operationId: submitQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+            examples:
+              textQuery:
+                summary: Text query example
+                value:
+                  user_id: "farmer_001"
+                  query: "What are the symptoms of tomato late blight?"
+                  language: "en"
+              
+              imageQuery:
+                summary: Image query example
+                value:
+                  user_id: "farmer_002"
+                  query: "What disease is affecting my crop?"
+                  image_url: "https://s3.amazonaws.com/ure-mvp/uploads/crop_image.jpg"
+                  language: "hi"
+              
+              schemeQuery:
+                summary: Government scheme query
+                value:
+                  user_id: "farmer_003"
+                  query: "Am I eligible for PM-Kisan scheme?"
+                  context:
+                    land_size: 2.5
+                    state: "Maharashtra"
+                    district: "Nashik"
+                  language: "mr"
+              
+              irrigationQuery:
+                summary: Irrigation recommendation query
+                value:
+                  user_id: "farmer_004"
+                  query: "Should I irrigate my wheat field today?"
+                  context:
+                    location: "Nashik"
+                    crop: "wheat"
+                  language: "en"
+      
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+              examples:
+                diseaseResponse:
+                  summary: Disease identification response
+                  value:
+                    response: "Based on the image, your tomato plant has Late Blight disease. Symptoms include dark brown spots on leaves and stems. Treatment: Apply copper-based fungicide immediately and remove affected leaves."
+                    agent: "Agri-Expert"
+                    confidence: 0.92
+                    metadata:
+                      disease: "Tomato Late Blight"
+                      treatment: "Copper fungicide"
+                      market_price: "₹25/kg in Nashik"
+                    timestamp: "2026-02-28T10:30:00Z"
+                
+                schemeResponse:
+                  summary: PM-Kisan eligibility response
+                  value:
+                    response: "Yes, you are eligible for PM-Kisan scheme. You will receive ₹6000 per year in 3 installments. Apply online at pmkisan.gov.in with your Aadhaar card and land records."
+                    agent: "Policy-Navigator"
+                    confidence: 0.95
+                    metadata:
+                      eligible: true
+                      amount: 6000
+                      installments: 3
+                    timestamp: "2026-02-28T10:31:00Z"
+        
+        '400':
+          description: Bad request - Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Invalid request"
+                message: "user_id and query are required fields"
+                code: "INVALID_INPUT"
+        
+        '403':
+          description: Forbidden - Content blocked by safety guardrails
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Content blocked"
+                message: "Your query contains harmful or off-topic content. Please rephrase and focus on agricultural topics."
+                code: "GUARDRAIL_BLOCKED"
+        
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Internal server error"
+                message: "An unexpected error occurred. Please try again later."
+                code: "INTERNAL_ERROR"
+        
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Service unavailable"
+                message: "The service is temporarily unavailable. Please try again in a few minutes."
+                code: "SERVICE_UNAVAILABLE"
+
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the API is healthy and responsive
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2026-02-28T10:30:00Z"
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+components:
+  schemas:
+    QueryRequest:
+      type: object
+      required:
+        - user_id
+        - query
+      properties:
+        user_id:
+          type: string
+          description: Unique identifier for the farmer
+          example: "farmer_001"
+          minLength: 3
+          maxLength: 50
+        
+        query:
+          type: string
+          description: The farmer's question or request
+          example: "What are the symptoms of tomato late blight?"
+          minLength: 5
+          maxLength: 1000
+        
+        language:
+          type: string
+          description: Preferred response language
+          enum: [en, hi, mr]
+          default: en
+          example: "en"
+        
+        image_url:
+          type: string
+          format: uri
+          description: URL of crop image for disease identification (optional)
+          example: "https://s3.amazonaws.com/ure-mvp/uploads/crop_image.jpg"
+        
+        context:
+          type: object
+          description: Additional context for the query (optional)
+          properties:
+            location:
+              type: string
+              description: Farmer's location (village/district)
+              example: "Nashik"
+            
+            crop:
+              type: string
+              description: Crop type
+              example: "tomato"
+            
+            land_size:
+              type: number
+              description: Land size in hectares
+              example: 2.5
+            
+            state:
+              type: string
+              description: State name
+              example: "Maharashtra"
+            
+            district:
+              type: string
+              description: District name
+              example: "Nashik"
+    
+    QueryResponse:
+      type: object
+      properties:
+        response:
+          type: string
+          description: AI-generated response in requested language
+          example: "Based on the image, your tomato plant has Late Blight disease..."
+        
+        agent:
+          type: string
+          description: Name of the specialist agent that handled the query
+          enum: [Supervisor, Agri-Expert, Policy-Navigator, Resource-Optimizer]
+          example: "Agri-Expert"
+        
+        confidence:
+          type: number
+          format: float
+          description: Confidence score of the response (0.0 to 1.0)
+          minimum: 0.0
+          maximum: 1.0
+          example: 0.92
+        
+        metadata:
+          type: object
+          description: Additional metadata about the response
+          additionalProperties: true
+          example:
+            disease: "Tomato Late Blight"
+            treatment: "Copper fungicide"
+            market_price: "₹25/kg"
+        
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+          example: "2026-02-28T10:30:00Z"
+    
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: "Invalid request"
+        
+        message:
+          type: string
+          description: Human-readable error message
+          example: "user_id and query are required fields"
+        
+        code:
+          type: string
+          description: Error code for programmatic handling
+          enum:
+            - INVALID_INPUT
+            - GUARDRAIL_BLOCKED
+            - INTERNAL_ERROR
+            - SERVICE_UNAVAILABLE
+            - TIMEOUT
+          example: "INVALID_INPUT"
+        
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+          example: "2026-02-28T10:30:00Z"
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication (future implementation)
+
+# Future: Add security requirement
+# security:
+#   - ApiKeyAuth: []

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URE Wireframes - Streamlit Web App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        
+        .wireframes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .wireframe {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .wireframe-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .wireframe-content {
+            padding: 20px;
+            background: white;
+            min-height: 600px;
+            position: relative;
+        }
+        
+        /* Wireframe Styles */
+        .header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .header h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .sidebar {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .sidebar-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .button:hover {
+            opacity: 0.9;
+        }
+        
+        .content-area {
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .content-placeholder {
+            background: #f8f9fa;
+            padding: 40px;
+            text-align: center;
+            color: #999;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .response-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .response-title {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+        
+        .history-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .history-role {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+        
+        .history-text {
+            color: #555;
+        }
+        
+        .image-upload {
+            border: 2px dashed #667eea;
+            padding: 20px;
+            text-align: center;
+            border-radius: 4px;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+        
+        .description {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #856404;
+            line-height: 1.5;
+        }
+        
+        .feature-list {
+            list-style: none;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        .feature-list li:before {
+            content: "✓ ";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 URE Wireframes - Streamlit Web App (MVP)</h1>
+        
+        <div class="wireframes-grid">
+            <!-- Wireframe 1: Main Dashboard -->
+            <div class="wireframe">
+                <div class="wireframe-title">1. Main Dashboard (Home)</div>
+                <div class="wireframe-content">
+                    <div class="header">
+                        <h2>🌾 Gram-Setu: Village Bridge AI</h2>
+                        <p>Your AI Assistant for Agricultural Guidance</p>
+                    </div>
+                    
+                    <div class="tabs">
+                        <button class="tab active">Query</button>
+                        <button class="tab">History</button>
+                        <button class="tab">Profile</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">📝 Ask Your Question</div>
+                        <textarea class="form-input" style="height: 80px; resize: vertical;" placeholder="e.g., My wheat has yellow spots. What should I do?"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">🖼️ Or Upload a Crop Image</div>
+                        <div class="image-upload">
+                            📤 Drag & drop image here<br/>or click to upload<br/>(JPG, PNG - Max 5MB)
+                        </div>
+                    </div>
+                    
+                    <button class="button">🔍 Get Advice</button>
+                    
+                    <div class="description">
+                        <strong>💡 Tip:</strong> You can ask about crop diseases, market prices, government schemes, or irrigation recommendations. Our AI will provide personalized advice based on your farm details.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wireframe 2: Response Display -->
+            <div class="wireframe">
+                <div class="wireframe-title">2. Response Display</div>
+                <div class="wireframe-content">
+                    <div class="header">
+                        <h2>🌾 Gram-Setu: Village Bridge AI</h2>
+                        <p>Your AI Assistant for Agricultural Guidance</p>
+                    </div>
+                    
+                    <div class="response-box">
+                        <div class="response-title">🤖 AI Response</div>
+                        <strong>Disease Identified:</strong> Yellow Rust (85% confidence)<br/><br/>
+                        <strong>Treatment:</strong><br/>
+                        • Immediate: Remove infected leaves<br/>
+                        • Organic: Mix neem oil with soap water<br/>
+                        • Chemical: Apply fungicide (last resort)<br/><br/>
+                        <strong>Market Price:</strong> ₹2,500/quintal<br/>
+                        <strong>Best Market:</strong> Nashik Mandi<br/><br/>
+                        <strong>Subsidy Available:</strong> 20% under PM-Kisan
+                    </div>
+                    
+                    <button class="button" style="background: #4caf50;">✓ Helpful</button>
+                    <button class="button" style="background: #f44336; margin-top: 5px;">✗ Not Helpful</button>
+                    
+                    <div class="description">
+                        Response generated by Agri-Expert Agent | Confidence: 85% | Time: 2.3s
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wireframe 3: Sidebar Profile -->
+            <div class="wireframe">
+                <div class="wireframe-title">3. User Profile (Sidebar)</div>
+                <div class="wireframe-content">
+                    <div class="sidebar">
+                        <div class="sidebar-title">👨‍🌾 Your Profile</div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">User ID</div>
+                            <input type="text" class="form-input" value="farmer_12345" readonly/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">Full Name</div>
+                            <input type="text" class="form-input" placeholder="Rajesh Kumar"/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">Farm Size (acres)</div>
+                            <input type="number" class="form-input" value="5" min="1" max="100"/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">Primary Crop</div>
+                            <select class="form-select">
+                                <option>Wheat</option>
+                                <option>Cotton</option>
+                                <option>Rice</option>
+                                <option>Corn</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">Village</div>
+                            <input type="text" class="form-input" value="Nashik"/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">Language</div>
+                            <select class="form-select">
+                                <option>English</option>
+                                <option>Hindi</option>
+                                <option>Marathi</option>
+                            </select>
+                        </div>
+                        
+                        <button class="button">💾 Save Profile</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wireframe 4: Conversation History -->
+            <div class="wireframe">
+                <div class="wireframe-title">4. Conversation History</div>
+                <div class="wireframe-content">
+                    <div class="header">
+                        <h2>📜 Conversation History</h2>
+                        <p>Your previous queries and responses</p>
+                    </div>
+                    
+                    <div class="history-item">
+                        <div class="history-role">👨‍🌾 You (Today, 2:30 PM)</div>
+                        <div class="history-text">My wheat has yellow spots. What should I do?</div>
+                    </div>
+                    
+                    <div class="history-item">
+                        <div class="history-role">🤖 Gram-Setu (2:30 PM)</div>
+                        <div class="history-text">You have Yellow Rust. Use Neem Oil with soap water. Market price: ₹2500/quintal. Eligible for 20% subsidy under PM-Kisan.</div>
+                    </div>
+                    
+                    <div class="history-item">
+                        <div class="history-role">👨‍🌾 You (Today, 2:15 PM)</div>
+                        <div class="history-text">Should I irrigate my cotton field today?</div>
+                    </div>
+                    
+                    <div class="history-item">
+                        <div class="history-role">🤖 Gram-Setu (2:15 PM)</div>
+                        <div class="history-text">Wait for rain (60% probability in 12 hours). If no rain, irrigate tomorrow morning. Current soil moisture: 0.4 (low).</div>
+                    </div>
+                    
+                    <button class="button" style="background: #f44336;">🗑️ Clear History</button>
+                </div>
+            </div>
+            
+            <!-- Wireframe 5: Disease Analysis -->
+            <div class="wireframe">
+                <div class="wireframe-title">5. Disease Analysis (Image Upload)</div>
+                <div class="wireframe-content">
+                    <div class="header">
+                        <h2>🔬 Crop Disease Analysis</h2>
+                        <p>Upload a photo of your crop for instant diagnosis</p>
+                    </div>
+                    
+                    <div class="image-upload">
+                        📤 Drag & drop image here<br/>or click to upload<br/>(JPG, PNG - Max 5MB)
+                    </div>
+                    
+                    <div class="response-box">
+                        <div class="response-title">📊 Analysis Results</div>
+                        <strong>Disease:</strong> Yellow Rust<br/>
+                        <strong>Confidence:</strong> 85%<br/>
+                        <strong>Severity:</strong> Moderate<br/><br/>
+                        <strong>Similar Cases:</strong><br/>
+                        • PlantVillage Match 1: 92% similar<br/>
+                        • PlantVillage Match 2: 88% similar<br/>
+                        • PlantVillage Match 3: 85% similar<br/><br/>
+                        <strong>Recommended Treatment:</strong><br/>
+                        1. Remove infected leaves<br/>
+                        2. Apply neem oil spray<br/>
+                        3. Improve air circulation
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wireframe 6: Scheme Eligibility -->
+            <div class="wireframe">
+                <div class="wireframe-title">6. Government Scheme Eligibility</div>
+                <div class="wireframe-content">
+                    <div class="header">
+                        <h2>💰 Government Schemes</h2>
+                        <p>Check your eligibility for agricultural schemes</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">Select Scheme</div>
+                        <select class="form-select">
+                            <option>PM-Kisan (₹6000/year)</option>
+                            <option>PMKSY (Irrigation)</option>
+                            <option>MNREGA (Employment)</option>
+                        </select>
+                    </div>
+                    
+                    <button class="button">🔍 Check Eligibility</button>
+                    
+                    <div class="response-box">
+                        <div class="response-title">✅ Eligibility Status</div>
+                        <strong>Scheme:</strong> PM-Kisan<br/>
+                        <strong>Status:</strong> ELIGIBLE<br/>
+                        <strong>Annual Subsidy:</strong> ₹6,000<br/>
+                        <strong>Monthly Benefit:</strong> ₹500<br/><br/>
+                        <strong>Required Documents:</strong><br/>
+                        • Aadhar Card<br/>
+                        • Land Deed<br/>
+                        • Bank Account Details<br/><br/>
+                        <strong>Application Link:</strong> pmkisan.gov.in<br/>
+                        <strong>Deadline:</strong> 31 Dec 2026
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wireframe 7: Irrigation Recommendation -->
+            <div class="wireframe">
+                <div class="wireframe-title">7. Irrigation Recommendation</div>
+                <div class="wireframe-content">
+                    <div class="header">
+                        <h2>💧 Irrigation Advisor</h2>
+                        <p>Get personalized irrigation recommendations</p>
+                    </div>
+                    
+                    <div class="response-box">
+                        <div class="response-title">📊 Current Status</div>
+                        <strong>Soil Moisture:</strong> 0.4 (Low)<br/>
+                        <strong>Temperature:</strong> 35°C<br/>
+                        <strong>Humidity:</strong> 40%<br/>
+                        <strong>Rain Forecast:</strong> 60% in 12 hours<br/><br/>
+                        <strong>Evapotranspiration (ET):</strong> 5mm/day<br/>
+                        <strong>Water Needed:</strong> 25mm/week
+                    </div>
+                    
+                    <div class="response-box" style="background: #fff3cd; border-left-color: #ffc107;">
+                        <div class="response-title" style="color: #856404;">⚠️ Recommendation</div>
+                        <strong>WAIT FOR RAIN</strong><br/>
+                        60% probability of rain in 12 hours<br/>
+                        If no rain, irrigate tomorrow morning<br/>
+                        Duration: 2 hours<br/>
+                        Cost: ₹200<br/>
+                        Water Saved: 5,000 liters
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wireframe 8: Market Prices -->
+            <div class="wireframe">
+                <div class="wireframe-title">8. Market Prices & Trends</div>
+                <div class="wireframe-content">
+                    <div class="header">
+                        <h2>📈 Market Prices</h2>
+                        <p>Real-time prices from agricultural markets</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">Select Crop</div>
+                        <select class="form-select">
+                            <option>Wheat</option>
+                            <option>Cotton</option>
+                            <option>Rice</option>
+                        </select>
+                    </div>
+                    
+                    <div class="response-box">
+                        <div class="response-title">💹 Price Information</div>
+                        <strong>Crop:</strong> Wheat<br/>
+                        <strong>Current Price:</strong> ₹2,500/quintal<br/>
+                        <strong>Yesterday:</strong> ₹2,480/quintal (+0.8%)<br/>
+                        <strong>7-Day Avg:</strong> ₹2,450/quintal<br/><br/>
+                        <strong>Best Markets:</strong><br/>
+                        1. Nashik Mandi: ₹2,520/quintal<br/>
+                        2. Aurangabad: ₹2,510/quintal<br/>
+                        3. Pune: ₹2,490/quintal<br/><br/>
+                        <strong>Trend:</strong> ↗️ Upward (Good time to sell)
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wireframe 9: Settings -->
+            <div class="wireframe">
+                <div class="wireframe-title">9. Settings & Preferences</div>
+                <div class="wireframe-content">
+                    <div class="sidebar">
+                        <div class="sidebar-title">⚙️ Settings</div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">🌐 Language</div>
+                            <select class="form-select">
+                                <option>English</option>
+                                <option>Hindi</option>
+                                <option>Marathi</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">🔔 Notifications</div>
+                            <select class="form-select">
+                                <option>Enabled</option>
+                                <option>Disabled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">📊 Data Sharing</div>
+                            <select class="form-select">
+                                <option>Enabled (Helps improve AI)</option>
+                                <option>Disabled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">🔐 Privacy</div>
+                            <select class="form-select">
+                                <option>Standard</option>
+                                <option>Enhanced</option>
+                            </select>
+                        </div>
+                        
+                        <button class="button">💾 Save Settings</button>
+                        <button class="button" style="background: #f44336; margin-top: 5px;">🚪 Logout</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wireframe 10: Mobile View -->
+            <div class="wireframe">
+                <div class="wireframe-title">10. Mobile View (Responsive)</div>
+                <div class="wireframe-content">
+                    <div style="border: 2px solid #ddd; border-radius: 8px; padding: 10px; background: #f8f9fa; max-width: 300px; margin: 0 auto;">
+                        <div class="header" style="padding: 10px;">
+                            <h2 style="font-size: 16px;">🌾 Gram-Setu</h2>
+                        </div>
+                        
+                        <div style="padding: 10px;">
+                            <div class="form-group">
+                                <textarea class="form-input" style="height: 60px; font-size: 11px;" placeholder="Ask question..."></textarea>
+                            </div>
+                            
+                            <button class="button" style="font-size: 11px; padding: 8px;">Get Advice</button>
+                            
+                            <div class="response-box" style="margin-top: 10px; padding: 10px; font-size: 11px;">
+                                <div class="response-title" style="font-size: 11px;">Response</div>
+                                Yellow Rust detected. Use neem oil. Price: ₹2500/quintal.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

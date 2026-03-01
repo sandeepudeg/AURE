@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+rural/
+venv/
+ENV/
+env/
+
+# Environment Variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Logs
+*.log
+logs/
+
+# AWS
+.aws/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project Specific
+uploads/
+temp/
+*.tmp
+lambda_layer/
+lambda_mumbai.zip
+*.zip
+
+# Large data files
+data/plantvillage/
+plant_dataset/
+
+# Documentation
+docs/_build/

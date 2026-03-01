@@ -1,0 +1,32 @@
+
+'charmap' codec can't encode character '\u2514' in position 4911: character maps to <undefined>
+2026-02-28T07:20:30 INIT_START Runtime Version: python:3.11.mainlinev2.v3	Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:0de7d4de4aef04631dc8443fb686ab8bf14de4d4a348cb0d407cce5f48aef7d8
+2026-02-28T07:20:31 [INFO]	2026-02-28T07:20:31.468Z		Found credentials in environment variables.
+2026-02-28T07:20:31 START RequestId: 1091d13c-b077-4800-b1ed-091e8bcefd96 Version: $LATEST
+2026-02-28T07:20:31 [INFO]	2026-02-28T07:20:31.646Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Processing query for user test_user_123: What crops are suitable for Pune in current weathe...
+2026-02-28T07:20:31 [WARNING]	2026-02-28T07:20:31.695Z	1091d13c-b077-4800-b1ed-091e8bcefd96	No user context found for test_user_123, using defaults
+2026-02-28T07:20:32 [INFO]	2026-02-28T07:20:32.382Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Guardrails initialized: q6wfsifs9d72 (vDRAFT)
+2026-02-28T07:20:32 [INFO]	2026-02-28T07:20:32.383Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Bedrock Guardrails initialized successfully
+2026-02-28T07:20:32 [INFO]	2026-02-28T07:20:32.400Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Amazon Translate initialized (region: us-east-1)
+2026-02-28T07:20:32 [INFO]	2026-02-28T07:20:32.400Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Amazon Translate initialized successfully
+2026-02-28T07:20:32 [INFO]	2026-02-28T07:20:32.423Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Initialized PilotMetrics with namespace: URE/Pilot
+2026-02-28T07:20:32 [INFO]	2026-02-28T07:20:32.423Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Pilot Metrics initialized successfully
+2026-02-28T07:20:32 [INFO]	2026-02-28T07:20:32.764Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Guardrail check: action=NONE, blocked=False
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.218Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Loaded 4 tools from registry
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.218Z	1091d13c-b077-4800-b1ed-091e8bcefd96	MCP Client initialized with 4 tools
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.218Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Connected servers: ['agmarknet', 'weather']
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.235Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Found credentials in environment variables.
+2026-02-28T07:20:34 [WARNING]	2026-02-28T07:20:34.457Z	1091d13c-b077-4800-b1ed-091e8bcefd96	tool=<<function get_mandi_prices at 0x7f1530d1dd00>> | unrecognized tool specification
+2026-02-28T07:20:34 [WARNING]	2026-02-28T07:20:34.457Z	1091d13c-b077-4800-b1ed-091e8bcefd96	tool=<<function get_nearby_mandis at 0x7f152fa43b00>> | unrecognized tool specification
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.476Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Found credentials in environment variables.
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.593Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Loaded 4 tools from registry
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.593Z	1091d13c-b077-4800-b1ed-091e8bcefd96	MCP Client initialized with 4 tools
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.594Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Connected servers: ['agmarknet', 'weather']
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.603Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Found credentials in environment variables.
+2026-02-28T07:20:34 [WARNING]	2026-02-28T07:20:34.720Z	1091d13c-b077-4800-b1ed-091e8bcefd96	tool=<<function get_current_weather at 0x7f152ea6cc20>> | unrecognized tool specification
+2026-02-28T07:20:34 [WARNING]	2026-02-28T07:20:34.720Z	1091d13c-b077-4800-b1ed-091e8bcefd96	tool=<<function get_weather_forecast at 0x7f152ea6cd60>> | unrecognized tool specification
+2026-02-28T07:20:34 [INFO]	2026-02-28T07:20:34.740Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Found credentials in environment variables.
+2026-02-28T07:20:35 [WARNING]	2026-02-28T07:20:35.038Z	1091d13c-b077-4800-b1ed-091e8bcefd96	tool=<<strands.agent.agent.Agent object at 0x7f152fa76d50>> | unrecognized tool specification
+2026-02-28T07:20:35 [WARNING]	2026-02-28T07:20:35.038Z	1091d13c-b077-4800-b1ed-091e8bcefd96	tool=<<strands.agent.agent.Agent object at 0x7f152f2bbad0>> | unrecognized tool specification
+2026-02-28T07:20:35 [WARNING]	2026-02-28T07:20:35.038Z	1091d13c-b077-4800-b1ed-091e8bcefd96	tool=<<strands.agent.agent.Agent object at 0x7f152eae1950>> | unrecognized tool specification
+2026-02-28T07:20:35 [INFO]	2026-02-28T07:20:35.040Z	1091d13c-b077-4800-b1ed-091e8bcefd96	Creating Strands MetricsClient

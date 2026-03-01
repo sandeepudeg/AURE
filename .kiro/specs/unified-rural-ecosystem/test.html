@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost Projection Calculator - Gram-Setu</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f8fbf9;
+            --card-bg: #ffffff;
+            --primary-green: #2e7d32;
+            --secondary-green: #e8f5e9;
+            --text-main: #1a1a1a;
+            --text-sub: #666666;
+            --accent-blue: #4682b4;
+            --accent-orange: #d4a017;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dashboard {
+            width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .header-section { grid-column: span 2; margin-bottom: 10px; }
+        .header-section h1 { margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+        .header-section p { color: var(--text-sub); margin: 5px 0 0 0; font-size: 14px; }
+
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .metric-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0; }
+        .metric-card.cost { background: #f1f8f1; border-color: #c8e6c9; }
+        .metric-label { font-size: 14px; color: var(--text-sub); display: flex; align-items: center; gap: 8px; }
+        .metric-value { font-size: 28px; font-weight: bold; margin-top: 8px; color: var(--primary-green); }
+
+        .control-group { margin-bottom: 25px; }
+        .control-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .control-label { font-weight: 600; font-size: 15px; color: var(--text-main); }
+        .control-value { font-weight: bold; color: var(--primary-green); font-size: 18px; }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            appearance: none;
+            accent-color: var(--primary-green);
+        }
+
+        .strategy-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+        }
+        .strategy-info h4 { margin: 0; font-size: 14px; }
+        .strategy-info p { margin: 2px 0 0 0; font-size: 12px; color: var(--text-sub); }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider-round {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider-round:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider-round { background-color: var(--primary-green); }
+        input:checked + .slider-round:before { transform: translateX(22px); }
+
+        .bottleneck-alert {
+            grid-column: span 2;
+            background: #fff8f1;
+            border: 1px solid #ffe0b2;
+            padding: 15px;
+            border-radius: 8px;
+            color: #e65100;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="header-section">
+        <h1>📊 Cost Projection Calculator</h1>
+        <p>Explore the financial implications of scaling the URE platform for Gram-Setu</p>
+    </div>
+
+    <div class="card">
+        <div class="control-group">
+            <div class="control-header">
+                <span class="control-label">Number of Users</span>
+                <span class="control-value" id="userVal">500</span>
+            </div>
+            <input type="range" id="userSlider" min="100" max="100000" step="100" value="500">
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">Interaction Mix</span>
+            <div style="margin-top: 15px;">
+                <div class="control-header"><span class="control-sub">Text Queries</span><span id="textVal">60%</span></div>
+                <input type="range" id="textSlider" min="0" max="100" value="60">
+            </div>
+            <div style="margin-top: 15px;">
+                <div class="control-header"><span class="control-sub">Image Analysis</span><span id="imgVal">20%</span></div>
+                <input type="range" id="imgSlider" min="0" max="40" value="20">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">Optimization Strategies</span>
+            <div class="strategy-toggle">
+                <div class="strategy-info"><h4>Prompt Caching</h4><p>Up to 90% discount on repeated context</p></div>
+                <label class="switch"><input type="checkbox" id="opt1" checked><span class="slider-round"></span></label>
+            </div>
+            <div class="strategy-toggle">
+                <div class="strategy-info"><h4>Batch Mode</h4><p>50% discount for non-real-time tasks</p></div>
+                <label class="switch"><input type="checkbox" id="opt2" checked><span class="slider-round"></span></label>
+            </div>
+            <div class="strategy-toggle">
+                <div class="strategy-info"><h4>Model Tiering</h4><p>Use Haiku for simple, Sonnet for complex</p></div>
+                <label class="switch"><input type="checkbox" id="opt3" checked><span class="slider-round"></span></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-col">
+        <div class="metric-grid">
+            <div class="metric-card cost">
+                <div class="metric-label">Monthly Cost</div>
+                <div class="metric-value" id="totalCost">$399.37</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Cost per User</div>
+                <div class="metric-value" id="perUserCost">$0.80</div>
+            </div>
+        </div>
+
+        <div class="card" style="height: 380px;">
+            <span class="control-label">Cost Projection by Scale</span>
+            <canvas id="costChart" style="margin-top: 20px;"></canvas>
+        </div>
+    </div>
+
+    <div class="bottleneck-alert">
+        <strong>Critical Bottleneck:</strong> Bedrock API calls represent <strong>99%+</strong> of costs due to agentic amplification (2x LLM calls per interaction).
+    </div>
+</div>
+
+<script>
+    const userSlider = document.getElementById('userSlider');
+    const textSlider = document.getElementById('textSlider');
+    const imgSlider = document.getElementById('imgSlider');
+    const opts = [document.getElementById('opt1'), document.getElementById('opt2'), document.getElementById('opt3')];
+
+    const ctx = document.getElementById('costChart').getContext('2d');
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['100', '500', '1K', '5K', '10K', '25K', '50K', '100K'],
+            datasets: [{
+                label: 'Total Monthly Cost',
+                data: [],
+                borderColor: '#2e7d32',
+                backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '$' + v.toLocaleString() } } }
+        }
+    });
+
+    function calculate() {
+        const users = parseInt(userSlider.value);
+        document.getElementById('userVal').innerText = users.toLocaleString();
+        document.getElementById('textVal').innerText = textSlider.value + '%';
+        document.getElementById('imgVal').innerText = imgSlider.value + '%';
+
+        let reduction = 0;
+        if (opts[0].checked) reduction += 0.10;
+        if (opts[1].checked) reduction += 0.08;
+        if (opts[2].checked) reduction += 0.058;
+
+        const baseUnitCost = 1.05;
+        const finalUnitCost = baseUnitCost * (1 - reduction);
+        const total = users * finalUnitCost;
+
+        document.getElementById('totalCost').innerText = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('perUserCost').innerText = '$' + finalUnitCost.toFixed(2);
+
+        const scales = [100, 500, 1000, 5000, 10000, 25000, 50000, 100000];
+        chart.data.datasets[0].data = scales.map(s => s * finalUnitCost);
+        chart.update();
+    }
+
+    [userSlider, textSlider, imgSlider].forEach(s => s.oninput = calculate);
+    opts.forEach(o => o.onchange = calculate);
+    calculate();
+</script>
+
+</body>
+</html>

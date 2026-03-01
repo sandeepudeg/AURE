@@ -1,0 +1,75 @@
+# URE MVP - AWS Lambda Deployment Dependencies
+# Optimized for Lambda deployment (minimal size)
+# Install with: pip install -r requirements-lambda.txt -t lambda_package/
+
+# ============================================================================
+# Core AWS SDK (already available in Lambda runtime, but pinned for consistency)
+# ============================================================================
+boto3==1.34.34                    # AWS SDK for Python
+botocore==1.34.34                 # Low-level AWS service access
+
+# ============================================================================
+# AI/ML - Strands Agents SDK
+# ============================================================================
+strands-agents==0.1.0             # Strands Agents SDK for multi-agent orchestration
+anthropic==0.18.1                 # Anthropic Claude API client
+
+# ============================================================================
+# HTTP & API (for MCP Client)
+# ============================================================================
+requests==2.31.0                  # HTTP library for MCP server calls
+urllib3==2.2.0                    # HTTP client
+
+# ============================================================================
+# Data Processing (minimal)
+# ============================================================================
+pandas==2.2.0                     # Data manipulation for CSV processing
+numpy==1.26.3                     # Numerical computing
+
+# ============================================================================
+# Image Processing (minimal)
+# ============================================================================
+Pillow==10.2.0                    # Image processing for crop images
+
+# ============================================================================
+# Vector Database Client
+# ============================================================================
+opensearch-py==2.4.2              # OpenSearch client for PlantVillage embeddings
+
+# ============================================================================
+# JSON & Data Validation
+# ============================================================================
+jsonschema==4.21.1                # JSON schema validation for MCP tool registry
+pydantic==2.6.0                   # Data validation
+
+# ============================================================================
+# Logging (CloudWatch integration)
+# ============================================================================
+python-json-logger==2.0.7         # JSON logging for CloudWatch
+aws-lambda-powertools==2.32.0     # Lambda utilities
+
+# ============================================================================
+# Utilities
+# ============================================================================
+tenacity==8.2.3                   # Retry library for robust API calls
+cachetools==5.3.2                 # Caching utilities for MCP fallback
+python-dateutil==2.8.2            # Date/time utilities
+pytz==2024.1                      # Timezone definitions
+
+# ============================================================================
+# Security
+# ============================================================================
+cryptography==42.0.2              # Cryptographic primitives
+
+# ============================================================================
+# Notes for Lambda Deployment
+# ============================================================================
+# 1. Lambda has boto3 and botocore pre-installed, but versions may differ
+# 2. Total package size should be < 250MB unzipped (Lambda limit)
+# 3. Use Lambda Layers for large dependencies (numpy, pandas, Pillow)
+# 4. Consider using slim/alpine versions of packages when available
+# 5. Remove unnecessary files after installation:
+#    - find . -type d -name "tests" -exec rm -rf {} +
+#    - find . -type d -name "__pycache__" -exec rm -rf {} +
+#    - find . -name "*.pyc" -delete
+#    - find . -name "*.so" | grep -v "\.libs" | xargs strip

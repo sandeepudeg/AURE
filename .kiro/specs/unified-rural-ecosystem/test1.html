@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gram-Setu | Cost & Interaction Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --primary-green: #2e7d32;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --rag-blue: #0284c7;
+            --img-orange: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
+
+        .dashboard {
+            width: 1100px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .full-width { grid-column: span 2; }
+        h1 { margin: 0; font-size: 22px; color: var(--primary-green); }
+        
+        .control-group { margin-bottom: 20px; }
+        .label-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+        
+        input[type="range"] { width: 100%; accent-color: var(--primary-green); cursor: pointer; }
+        
+        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .metric-card { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+        .metric-value { font-size: 24px; font-weight: 800; color: var(--primary-green); }
+        .metric-label { font-size: 12px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .viz-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+        .chart-container { height: 300px; position: relative; }
+        
+        .strategy-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f1f5f9; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+        
+        .alert-box { grid-column: span 2; background: #fff7ed; border: 1px solid #fed7aa; padding: 15px; border-radius: 12px; color: #9a3412; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="card full-width">
+        <h1>🌾 Gram-Setu: Unit Economics & Interaction Mix</h1>
+    </div>
+
+    <div class="card">
+        <div class="control-group">
+            <div class="label-row"><span>Number of Users</span><span id="uCount">500</span></div>
+            <input type="range" id="uSlider" min="100" max="100000" step="500" value="500">
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+        <div class="control-group">
+            <div class="label-row"><span>Text Queries</span><span id="tPct">60%</span></div>
+            <input type="range" id="tSlider" min="0" max="100" value="60">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>Image Analysis</span><span id="iPct">20%</span></div>
+            <input type="range" id="iSlider" min="0" max="100" value="20">
+        </div>
+        <div class="control-group">
+            <div class="label-row"><span>RAG Queries</span><span id="rPct">20%</span></div>
+            <input type="range" id="rSlider" min="0" max="100" value="20">
+        </div>
+
+        <div class="control-group" style="margin-top: 30px;">
+            <div class="label-row"><span>Optimizations</span></div>
+            <div class="strategy-item">Prompt Caching <input type="checkbox" id="c1" checked></div>
+            <div class="strategy-item">Batch Processing <input type="checkbox" id="c2" checked></div>
+            <div class="strategy-item">Model Tiering <input type="checkbox" id="c3" checked></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-label">Monthly Burn</div>
+                <div class="metric-value" id="mCost">$399.37</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Unit Cost/User</div>
+                <div class="metric-value" id="uCost">$0.80</div>
+            </div>
+        </div>
+
+        <div class="viz-grid">
+            <div class="chart-container">
+                <div class="label-row"><span>Interaction Breakdown</span></div>
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="label-row"><span>Scalability Projection</span></div>
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert-box">
+        <strong>⚠️ Scalability Warning:</strong> Bedrock API calls represent 99%+ of costs due to agentic amplification. RAG queries significantly increase token overhead but improve accuracy for Policy-Nav Agent.
+    </div>
+</div>
+
+<script>
+    const uSlider = document.getElementById('uSlider');
+    const tSlider = document.getElementById('tSlider');
+    const iSlider = document.getElementById('iSlider');
+    const rSlider = document.getElementById('rSlider');
+    const checks = [document.getElementById('c1'), document.getElementById('c2'), document.getElementById('c3')];
+
+    // Pie Chart Setup
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Text', 'Image', 'RAG'],
+            datasets: [{
+                data: [60, 20, 20],
+                backgroundColor: ['#2e7d32', '#f59e0b', '#0284c7'],
+                borderWidth: 0
+            }]
+        },
+        options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // Line Chart Setup
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['100', '1K', '10K', '50K', '100K'],
+            datasets: [{
+                label: 'Projected Cost',
+                data: [],
+                borderColor: '#2e7d32',
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(46, 125, 50, 0.05)'
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    function update() {
+        const users = parseInt(uSlider.value);
+        let tVal = parseInt(tSlider.value);
+        let iVal = parseInt(iSlider.value);
+        let rVal = parseInt(rSlider.value);
+
+        // Normalize Interaction Mix to 100%
+        const totalMix = tVal + iVal + rVal;
+        tVal = (tVal / totalMix) * 100;
+        iVal = (iVal / totalMix) * 100;
+        rVal = (rVal / totalMix) * 100;
+
+        document.getElementById('uCount').innerText = users.toLocaleString();
+        document.getElementById('tPct').innerText = Math.round(tVal) + '%';
+        document.getElementById('iPct').innerText = Math.round(iVal) + '%';
+        document.getElementById('rPct').innerText = Math.round(rVal) + '%';
+
+        // Calculation Logic
+        let discount = 0;
+        if (checks[0].checked) discount += 0.12;
+        if (checks[1].checked) discount += 0.10;
+        if (checks[2].checked) discount += 0.08;
+
+        const baseRate = 1.15; // Higher base due to RAG complexity
+        const finalRate = baseRate * (1 - discount);
+        const totalCost = users * finalRate;
+
+        document.getElementById('mCost').innerText = '$' + totalCost.toLocaleString(undefined, {maximumFractionDigits: 2});
+        document.getElementById('uCost').innerText = '$' + finalRate.toFixed(2);
+
+        // Update Visuals
+        pieChart.data.datasets[0].data = [tVal, iVal, rVal];
+        pieChart.update();
+
+        const scales = [100, 1000, 10000, 50000, 100000];
+        lineChart.data.datasets[0].data = scales.map(s => s * finalRate);
+        lineChart.update();
+    }
+
+    [uSlider, tSlider, iSlider, rSlider].forEach(s => s.oninput = update);
+    checks.forEach(c => c.onchange = update);
+    update();
+</script>
+
+</body>
+</html>

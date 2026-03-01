@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gram-Setu Cost Projection</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            width: 900px;
+            background: var(--card);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .header { border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .control-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #94a3b8; }
+        input[type="range"] { width: 100%; accent-color: var(--primary); }
+        .toggle-box { background: #334155; padding: 15px; border-radius: 8px; margin-top: 10px; }
+        .toggle-item { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .metric-box { text-align: center; background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid var(--primary); }
+        .metric-value { font-size: 2.5rem; font-weight: bold; color: #4ade80; }
+        .chart-container { background: #f8fafc; padding: 15px; border-radius: 10px; height: 300px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Gram-Setu Cost Projection</h1>
+        <p>Interactive Scalability & Optimization Analysis</p>
+    </div>
+
+    <div class="grid">
+        <div>
+            <div class="control-group">
+                <label>Number of Users: <span id="userCountText">500</span></label>
+                <input type="range" id="userSlider" min="100" max="100000" step="100" value="500">
+            </div>
+
+            <div class="toggle-box">
+                <label>Optimization Strategies</label>
+                <div class="toggle-item">
+                    <span>Prompt Caching (-10%)</span>
+                    <input type="checkbox" id="opt1" checked>
+                </div>
+                <div class="toggle-item">
+                    <span>Batch Mode (-8%)</span>
+                    <input type="checkbox" id="opt2" checked>
+                </div>
+                <div class="toggle-item">
+                    <span>Model Tiering (-5.8%)</span>
+                    <input type="checkbox" id="opt3" checked>
+                </div>
+            </div>
+
+            <div class="metric-box" style="margin-top: 20px;">
+                <label>Total Monthly Projection</label>
+                <div class="metric-value" id="totalCostDisplay">$0.00</div>
+                <small id="perUserText" style="color: #94a3b8;">Cost per user: $0.00</small>
+            </div>
+        </div>
+
+        <div>
+            <label style="color: #1e293b;">Scale Projection (USD)</label>
+            <div class="chart-container">
+                <canvas id="costChart"></canvas>
+            </div>
+            <p style="font-size: 0.8rem; color: #ef4444; margin-top: 15px;">
+                ⚠️ <strong>Critical Bottleneck:</strong> Bedrock API calls represent 99%+ of costs due to agentic amplification.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const userSlider = document.getElementById('userSlider');
+    const userCountText = document.getElementById('userCountText');
+    const totalCostDisplay = document.getElementById('totalCostDisplay');
+    const perUserText = document.getElementById('perUserText');
+    const opts = [document.getElementById('opt1'), document.getElementById('opt2'), document.getElementById('opt3')];
+
+    const ctx = document.getElementById('costChart').getContext('2d');
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [100, 500, 1000, 5000, 10000, 50000, 100000],
+            datasets: [{
+                label: 'Monthly Cost ($)',
+                data: [],
+                borderColor: '#2e7d32',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(74, 222, 128, 0.1)'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    function update() {
+        const users = parseInt(userSlider.value);
+        userCountText.innerText = users.toLocaleString();
+
+        let reduction = 0;
+        if (opts[0].checked) reduction += 0.10;
+        if (opts[1].checked) reduction += 0.08;
+        if (opts[2].checked) reduction += 0.058;
+
+        const baseCost = 1.05;
+        const finalPerUser = baseCost * (1 - reduction);
+        const totalCost = users * finalPerUser;
+
+        totalCostDisplay.innerText = '$' + totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        perUserText.innerText = `Cost per user: $${finalPerUser.toFixed(2)} (-${(reduction*100).toFixed(1)}%)`;
+
+        // Update Chart
+        const chartData = [100, 500, 1000, 5000, 10000, 50000, 100000].map(s => s * finalPerUser);
+        chart.data.datasets[0].data = chartData;
+        chart.update();
+    }
+
+    userSlider.oninput = update;
+    opts.forEach(opt => opt.onchange = update);
+    update();
+</script>
+
+</body>
+</html>

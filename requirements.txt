@@ -1,0 +1,124 @@
+# URE MVP - Python Dependencies
+# Unified Rural Ecosystem - Minimum Viable Product
+# Python 3.11+
+# Updated based on working environment
+
+# ============================================================================
+# Core AWS SDK
+# ============================================================================
+boto3==1.42.59                    # AWS SDK for Python (S3, DynamoDB, Lambda, Bedrock)
+botocore==1.42.59                 # Low-level AWS service access
+
+# ============================================================================
+# AI/ML - Strands Agents SDK & Bedrock
+# ============================================================================
+strands-agents==1.1.0             # Strands Agents SDK for multi-agent orchestration
+anthropic==0.84.0                 # Anthropic Claude API client (for Bedrock)
+
+# ============================================================================
+# Web Framework - Streamlit
+# ============================================================================
+streamlit==1.54.0                 # Web UI framework for farmer interface
+streamlit-option-menu==0.3.12     # Enhanced menu components for Streamlit
+
+# ============================================================================
+# HTTP & API
+# ============================================================================
+requests==2.32.5                  # HTTP library for MCP server calls and external APIs
+urllib3==2.6.3                    # HTTP client (dependency for requests)
+httpx==0.28.1                     # Modern HTTP client (required by MCP)
+
+# ============================================================================
+# Data Processing
+# ============================================================================
+pandas==2.2.0                     # Data manipulation for CSV processing
+numpy==1.26.3                     # Numerical computing for irrigation calculations
+scipy==1.12.0                     # Scientific computing for evapotranspiration models
+
+# ============================================================================
+# Image Processing
+# ============================================================================
+Pillow==10.2.0                    # Image processing for crop image uploads
+opencv-python==4.9.0.80           # Computer vision for image preprocessing
+
+# ============================================================================
+# Vector Database & Search
+# ============================================================================
+opensearch-py==2.4.2              # OpenSearch client for PlantVillage embeddings
+
+# ============================================================================
+# JSON & Data Serialization
+# ============================================================================
+jsonschema==4.26.0                # JSON schema validation for MCP tool registry
+pydantic==2.12.5                  # Data validation and settings management
+pydantic-settings==2.13.1         # Settings management for Pydantic
+pydantic-core==2.41.5             # Core validation logic for Pydantic
+
+# ============================================================================
+# Environment & Configuration
+# ============================================================================
+python-dotenv==1.2.1              # Load environment variables from .env files
+pyyaml==6.0.3                     # YAML parsing for configuration files
+
+# ============================================================================
+# Logging & Monitoring
+# ============================================================================
+python-json-logger==2.0.7         # JSON logging for CloudWatch
+watchtower==3.0.1                 # CloudWatch Logs handler for Python logging
+
+# ============================================================================
+# Testing
+# ============================================================================
+pytest==7.4.4                     # Testing framework
+pytest-cov==4.1.0                 # Code coverage plugin for pytest
+pytest-mock==3.12.0               # Mocking plugin for pytest
+pytest-asyncio==0.23.4            # Async testing support
+pytest-timeout==2.2.0             # Timeout plugin for pytest
+pytest-xdist==3.5.0               # Parallel test execution
+hypothesis==6.98.3                # Property-based testing framework
+moto==5.0.0                       # Mock AWS services for testing
+
+# ============================================================================
+# Code Quality & Linting
+# ============================================================================
+black==24.1.1                     # Code formatter
+flake8==7.0.0                     # Linting tool
+pylint==3.0.3                     # Static code analysis
+mypy==1.8.0                       # Static type checker
+
+# ============================================================================
+# Security & Encryption
+# ============================================================================
+cryptography==42.0.2              # Cryptographic recipes and primitives
+
+# ============================================================================
+# Date & Time
+# ============================================================================
+python-dateutil==2.9.0.post0      # Extensions to the standard datetime module
+pytz==2025.2                      # Timezone definitions
+
+# ============================================================================
+# Utilities
+# ============================================================================
+tenacity==8.5.0                   # Retry library for robust API calls
+cachetools==5.5.2                 # Caching utilities for MCP fallback
+tqdm==4.67.3                      # Progress bars for long operations
+
+# ============================================================================
+# MCP (Model Context Protocol)
+# ============================================================================
+mcp==1.10.1                       # Model Context Protocol SDK
+
+# ============================================================================
+# Additional Dependencies
+# ============================================================================
+click==8.3.1                      # Command line interface creation
+colorama==0.4.6                   # Colored terminal output (Windows support)
+packaging==26.0                   # Core utilities for Python packages
+typing-extensions==4.15.0         # Backported type hints
+
+# ============================================================================
+# Optional: Development Tools
+# ============================================================================
+ipython==8.21.0                   # Enhanced Python shell
+jupyter==1.0.0                    # Jupyter notebooks for data exploration

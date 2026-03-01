@@ -30,7 +30,7 @@ def enable_model_access(region='us-east-1'):
     required_models = [
         'anthropic.claude-3-5-sonnet-20241022-v2:0',
         'amazon.titan-embed-text-v2:0',
-        'us.amazon.nova-pro-v1:0'
+        'anthropic.claude-3-5-sonnet-20241022-v2:0'
     ]
     
     logger.info("=" * 60)

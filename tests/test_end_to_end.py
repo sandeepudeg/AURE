@@ -65,7 +65,7 @@ def test_bedrock_connection():
         
         # Simple test query
         response = bedrock_runtime.converse(
-            modelId='us.amazon.nova-pro-v1:0',
+            modelId='anthropic.claude-3-5-sonnet-20241022-v2:0',
             messages=[{
                 "role": "user",
                 "content": [{"text": "Say 'OK' if you can hear me"}]
@@ -231,7 +231,7 @@ def test_image_analysis():
         bedrock_runtime = boto3.client('bedrock-runtime', region_name='us-east-1')
         
         response = bedrock_runtime.converse(
-            modelId='us.amazon.nova-pro-v1:0',
+            modelId='anthropic.claude-3-5-sonnet-20241022-v2:0',
             messages=[{
                 "role": "user",
                 "content": [

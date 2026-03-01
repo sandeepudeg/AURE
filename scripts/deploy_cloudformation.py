@@ -48,7 +48,7 @@ def deploy_stack(
         },
         {
             'ParameterKey': 'BedrockModelId',
-            'ParameterValue': 'us.amazon.nova-pro-v1:0'
+            'ParameterValue': 'anthropic.claude-3-5-sonnet-20241022-v2:0'
         },
         {
             'ParameterKey': 'BedrockKnowledgeBaseId',

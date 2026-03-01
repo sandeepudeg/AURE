@@ -160,7 +160,7 @@ https://console.aws.amazon.com/apigateway/home?region=ap-south-1
 - Lambda in us-east-1
 - API Gateway in us-east-1
 - App Runner in us-east-1
-- Model: `us.amazon.nova-pro-v1:0`
+- Model: `anthropic.claude-3-5-sonnet-20241022-v2:0`
 - Latency from India: 200-300ms
 - Load time from India: 10+ minutes
 

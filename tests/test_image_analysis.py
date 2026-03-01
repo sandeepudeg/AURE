@@ -40,7 +40,7 @@ def analyze_crop_image(image_path: str):
     
     # Prepare the request
     logger.info("\n3. Preparing multimodal request...")
-    model_id = 'us.amazon.nova-pro-v1:0'
+    model_id = 'anthropic.claude-3-5-sonnet-20241022-v2:0'
     
     # Create the message with image
     messages = [

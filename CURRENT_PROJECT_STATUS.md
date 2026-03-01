@@ -501,7 +501,7 @@ python scripts/manage_feedback.py --report weekly
 - **S3 Bucket**: ure-mvp-data-us-east-1-188238313375
 - **Bedrock KB**: 7XROZ6PZIF
 - **Guardrail**: q6wfsifs9d72
-- **Model**: us.amazon.nova-pro-v1:0
+- **Model**: anthropic.claude-3-5-sonnet-20241022-v2:0
 
 ### Key Files
 - **Deployment**: `scripts/deploy_production.py`

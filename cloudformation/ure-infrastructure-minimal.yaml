@@ -18,7 +18,7 @@ Parameters:
   
   BedrockModelId:
     Type: String
-    Default: us.amazon.nova-pro-v1:0
+    Default: 
     Description: Bedrock model ID
   
   BedrockKnowledgeBaseId:

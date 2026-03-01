@@ -222,7 +222,7 @@ All 5 missing features implemented and tested:
 - **S3 Bucket**: ure-mvp-data-us-east-1-188238313375
 - **Bedrock KB ID**: 7XROZ6PZIF
 - **Bedrock Guardrail ID**: q6wfsifs9d72
-- **Model ID**: us.amazon.nova-pro-v1:0
+- **Model ID**: anthropic.claude-3-5-sonnet-20241022-v2:0
 - **KMS Key ID**: fa333734-c93e-42b9-b84c-c9bb5adf64ba
 - **API Gateway URL**: https://jooncpo7cb.execute-api.us-east-1.amazonaws.com/dev/query
 
@@ -231,7 +231,7 @@ All 5 missing features implemented and tested:
 AWS_REGION=us-east-1
 BEDROCK_KB_ID=7XROZ6PZIF
 BEDROCK_GUARDRAIL_ID=q6wfsifs9d72
-BEDROCK_MODEL_ID=us.amazon.nova-pro-v1:0
+BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
 S3_BUCKET_NAME=ure-mvp-data-us-east-1-188238313375
 API_GATEWAY_URL=https://jooncpo7cb.execute-api.us-east-1.amazonaws.com/dev/query
 OPENWEATHER_API_KEY=4f744a31ea3afc09cb4391ad37be26c7

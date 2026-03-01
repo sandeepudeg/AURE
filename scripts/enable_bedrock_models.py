@@ -131,8 +131,7 @@ def test_model_invocation(region='us-east-1'):
         return False
 
 
-def 
-main():
+def main():
     """Main function"""
     region = 'us-east-1'
     

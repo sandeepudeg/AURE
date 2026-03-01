@@ -9,6 +9,8 @@ from strands.models import BedrockModel
 import os
 from dotenv import load_dotenv
 
+from config import BEDROCK_MODEL_ID
+
 # Import specialist agents
 from .agri_expert import agri_expert_agent
 from .policy_navigator import policy_navigator_agent
@@ -42,7 +44,7 @@ Always respond in a helpful, farmer-friendly manner.
 
 supervisor_agent = Agent(
     model=BedrockModel(
-        model_id=os.getenv("BEDROCK_MODEL_ID", "us.amazon.nova-pro-v1:0"),
+        model_id=BEDROCK_MODEL_ID,
         temperature=0.3
     ),
     system_prompt=SUPERVISOR_PROMPT,

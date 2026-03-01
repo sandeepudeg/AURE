@@ -9,6 +9,8 @@ from strands.models import BedrockModel
 import os
 from dotenv import load_dotenv
 
+from config import BEDROCK_MODEL_ID
+
 load_dotenv()
 
 POLICY_NAVIGATOR_PROMPT = """You are a Government Schemes Expert specializing in:
@@ -33,7 +35,7 @@ Always explain in Hindi/Marathi if needed and use simple language.
 
 policy_navigator_agent = Agent(
     model=BedrockModel(
-        model_id=os.getenv("BEDROCK_MODEL_ID", "us.amazon.nova-pro-v1:0"),
+        model_id=BEDROCK_MODEL_ID,
         temperature=0.2
     ),
     system_prompt=POLICY_NAVIGATOR_PROMPT,

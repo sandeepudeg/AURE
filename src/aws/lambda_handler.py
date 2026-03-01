@@ -257,9 +257,13 @@ def invoke_supervisor_agent(
                 region_name=os.getenv('BEDROCK_REGION', 'ap-south-1')
             )
             
-            # Get model ID from environment
-            model_id = os.getenv("BEDROCK_MODEL_ID", "apac.amazon.nova-lite-v1:0")
-            
+            # Get model ID from central config/env
+            try:
+                from config import BEDROCK_MODEL_ID, BEDROCK_REGION
+                model_id = BEDROCK_MODEL_ID
+            except Exception:
+                model_id = os.getenv("BEDROCK_MODEL_ID", "amazon.nova-lite-v1:0")
+
             response = bedrock_runtime.converse(
                 modelId=model_id,
                 messages=[{

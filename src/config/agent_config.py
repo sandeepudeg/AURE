@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Bedrock Model Configuration
-BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "us.amazon.nova-pro-v1:0")
-BEDROCK_REGION = os.getenv("AWS_REGION", "us-east-1")
+BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "amazon.nova-pro-v1:0")
+BEDROCK_REGION = os.getenv("BEDROCK_REGION", "us-east-1")
 
 # Agent Temperature Settings
 SUPERVISOR_TEMPERATURE = 0.3  # Balanced for routing decisions

@@ -288,10 +288,26 @@ def invoke_supervisor_agent(
             agent_used = 'agri-expert'
             metadata = {'image_analysis': image_analysis}
         else:
-            # Text-only query - use simple supervisor
-            agent_response = supervisor_agent(query)
-            agent_used = 'supervisor'
-            metadata = {}
+            # Text-only query - use simple supervisor with fallback
+            try:
+                agent_response = supervisor_agent(query)
+                agent_used = 'supervisor'
+                metadata = {}
+            except Exception as e:
+                # If ConverseStream fails, fallback to direct Bedrock API
+                error_msg = str(e)
+                if 'ConverseStream' in error_msg or 'Operation not allowed' in error_msg:
+                    logger.warning(f"Strands ConverseStream failed, using fallback agent: {error_msg}")
+                    try:
+                        from agents.fallback_agent import fallback_agent
+                        agent_response = fallback_agent(query)
+                        agent_used = 'supervisor-fallback'
+                        metadata = {'fallback': True, 'reason': 'ConverseStream not available'}
+                    except Exception as fallback_error:
+                        logger.error(f"Fallback agent also failed: {fallback_error}")
+                        raise
+                else:
+                    raise
         
         response_text = str(agent_response)
         
